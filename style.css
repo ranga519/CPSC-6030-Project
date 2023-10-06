@@ -12,7 +12,7 @@ body {
 }
 
 h1 {
-    background-color: rgb(201, 201, 178);
+    background-color: rgb(211, 211, 178);
     margin-top: -8px;
     padding-bottom: 10px;
     padding-top: 10px;
@@ -59,7 +59,7 @@ li {
     width: fit-content;
     height: min-content;
     position: absolute;
-    fill:beige;
+    fill:cello;
     stroke: white;
     margin: 0px;
     z-index: 1000;
