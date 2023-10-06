@@ -1,0 +1,81 @@
+/*Overall style changes*/
+* {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+/*Main body*/
+body {
+    background-color: cello;
+    text-align: center;
+}
+
+h1 {
+    background-color: rgb(201, 201, 178);
+    margin-top: -8px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+tr {
+    width: 100%;
+}
+
+#q3-container, #q1-container, #q4-container, #q2-container, #year-container {
+    width: 30%;
+    height: 48vh;
+}
+
+#q3-container {
+    width: 70%;
+}
+
+#q4-container, #q2-container, #year-container {
+    width: 33%;
+}
+
+h5 {
+    line-height: 1.6;
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+li {
+    list-style-type: none;
+}
+
+#tooltip-div {
+    width: fit-content;
+    height: min-content;
+    position: absolute;
+    fill:beige;
+    stroke: white;
+    margin: 0px;
+    z-index: 1000;
+}
+
+#tooltip-text {
+    font-size: 10px;
+}
+
+/*Credits*/
+footer {
+    line-height: 1.2;
+    background-color: rgb(201, 201, 178);
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: small;
+    margin-bottom: -8px;
+}
