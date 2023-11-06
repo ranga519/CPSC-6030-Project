@@ -26,7 +26,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(
                 
                 var dimensions = {
                     width : 800,
-                    height: 400,
+                    height: 420,
                     margin : {
                         top: 10,
                         bottom: 50,
@@ -66,6 +66,12 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(
                                    .attr("class","country")
                                    .attr("d", d => pathGenerator(d))
                                    .attr("fill", d=> colorScale(countryPop[d.properties.ADM0_A3]))
+                    // Add x-axis label
+                                svg1.append("text")
+                                    .attr("x", dimensions.width / 2)
+                                    .attr("y", dimensions.height)
+                                    .text("Global distribution of Natural Disasters")
+                                    .style("text-anchor", "middle");
 
 
 

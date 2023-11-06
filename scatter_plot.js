@@ -29,7 +29,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     var svg = d3.select("#scatterplot")
         .attr("width", dimensions.width)
         .attr("height", dimensions.height);
-        var container = document.getElementById("q2-container")
+    var container = document.getElementById("q2-container")
     // Create x-scale mapping the 'Year' values to the horizontal space
     var xScale = d3.scaleLinear()
         .domain([d3.min(data, function(d) { return d.Year; }), d3.max(data, function(d) { return d.Year; })])
