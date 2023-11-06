@@ -34,11 +34,11 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(
                         right: 30
                     }
                 }
-
+                
                 var svg1 = d3.select("#map")
                             .attr("width",dimensions.width)
                             .attr("height",dimensions.height)
-                
+                var container = document.getElementById("q1-container")
                 var projection = d3.geoEqualEarth() //georOrthographic, geoMercator
                                    .fitWidth(dimensions.width, {type: "Sphere"})
                 
