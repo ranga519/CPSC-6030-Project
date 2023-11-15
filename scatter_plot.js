@@ -2,13 +2,13 @@
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     // Define dimensions for the chart area
     var dimensions = {
-        width: 800,
+        width: 600,
         height: 400,
         margin: {
             top: 10,
             bottom: 50,
             right: 50,
-            left: 100
+            left: 70
         }
     };
 
