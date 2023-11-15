@@ -26,21 +26,24 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(
                 
                 var dimensions = {
                     width : 800,
-                    height: 420,
+                    height: 400,
                     margin : {
                         top: 10,
                         bottom: 50,
-                        left: 60,
+                        left: 30,
                         right: 30
                     }
                 }
-                
-                var svg1 = d3.select("#map")
+
+                var svg1 = d3.select("svg")
                             .attr("width",dimensions.width)
                             .attr("height",dimensions.height)
-                var container = document.getElementById("q1-container")
-                var projection = d3.geoEqualEarth() //georOrthographic, geoMercator
+                
+                var projection = d3.geoMercator() //georOrthographic, geoMercator, geoEqualEarth()
                                    .fitWidth(dimensions.width, {type: "Sphere"})
+                                   .center([0, 20]) // Adjust the longitude and latitude to change the center
+                                   .scale(110) // Adjust the scale for zooming
+                                   .translate([dimensions.width / 2 - dimensions.margin.left, dimensions.height / 2]);
                 
                 var pathGenerator = d3.geoPath(projection)
                 //blue sphere of earth
@@ -56,22 +59,62 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(
                
                 var colorScale = d3.scaleLinear()
                                    .domain([0,d3.max(Object.values(countryPop))])
-                                   .range(["white","blue"])
+                                   .range(["white","#263f91"])
 
+                // var countries = svg1.append("g")
+                //                    .selectAll(".country")
+                //                    .data(mapbook.features)
+                //                    .enter()
+                //                    .append("path")
+                //                    .attr("class","country")
+                //                    .attr("d", d => pathGenerator(d))
+                //                    .attr("fill", d=> colorScale(countryPop[d.properties.ADM0_A3]))
+                //                 //    .attr("stroke", "black") // Sets the border color
+                //                 //    .attr("stroke-width", 0.5); // Sets the border width
+                
+                var maptextbox = d3.select("body").append("div")
+                                .attr("class", "maptextbox")
+                                .style("opacity", 0)
+                                .style("position", "absolute")
+                                .style("padding", "10px")
+                                .style("background", "lightgrey")
+                                .style("border", "solid")
+                                .style("border-width", "1px")
+                                .style("border-radius", "5px")
+                                .style("pointer-events", "none");
+                            
                 var countries = svg1.append("g")
-                                   .selectAll(".country")
-                                   .data(mapbook.features)
-                                   .enter()
-                                   .append("path")
-                                   .attr("class","country")
-                                   .attr("d", d => pathGenerator(d))
-                                   .attr("fill", d=> colorScale(countryPop[d.properties.ADM0_A3]))
-                    // Add x-axis label
-                                svg1.append("text")
-                                    .attr("x", dimensions.width / 2)
-                                    .attr("y", dimensions.height)
-                                    .text("Global distribution of Natural Disasters")
-                                    .style("text-anchor", "middle");
+                                .selectAll(".country")
+                                .data(mapbook.features)
+                                .enter()
+                                .append("path")
+                                .attr("class", "country")
+                                .attr("d", d => pathGenerator(d))
+                                .attr("fill", d => colorScale(countryPop[d.properties.ADM0_A3]))
+                                .attr("stroke", "gray")
+                                .attr("stroke-width", 0.25)
+                                .on("mouseover", function(event, d) {
+                                    d3.select(this)
+                                        .attr("stroke", "black")
+                                        .attr("stroke-width", 1.5);
+                            
+                                    maptextbox.transition()
+                                        .duration(200)
+                                        .style("opacity", .9);
+                                    maptextbox.html(d.properties.ADMIN + ": " + (countryPop[d.properties.ADM0_A3] || 0) + " disasters")
+                                        .style("left", (event.pageX) + "px")
+                                        .style("top", (event.pageY - 28) + "px");
+                                })
+                                .on("mouseout", function(d) {
+                                    d3.select(this)
+                                        .attr("stroke", "gray")
+                                        .attr("stroke-width", 0.5);
+                            
+                                    maptextbox.transition()
+                                        .duration(500)
+                                        .style("opacity", 0);
+                                });
+                            
 
 
 
