@@ -7,7 +7,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         margin: {
             top: 10,
             bottom: 50,
-            right: 50,
+            right: 80,
             left: 70
         }
     };
@@ -43,41 +43,37 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         .range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top]);
 
     // Create y-axis with appropriate tick values using a logarithmic scale and custom tick format
-    var yAxis = d3.axisLeft(yScale).ticks(5, "~s").tickFormat(d3.format(".2s"));
-
-    // Create a tooltip div
-    var tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
+    var yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d3.format(".2s"));
 
     // Create circles for each data point, assigning colors based on 'Country'
     var dots = svg.selectAll("circle")
         .data(data)
         .enter()
         .append("circle")
-        .attr("cx", function(d) { return xScale(new Date(d.Year, d.Month - 1, 1)); }) // X-coordinate based on both 'Year' and 'Month'
-        .attr("cy", function(d) { return yScale(Math.max(1, d.Total_Affected)); }) // Y-coordinate based on 'Total_Affected', ensuring a minimum value of 1
-        .attr("r", 3) // Radius of the circles
-        .attr("fill", function(d) { return colorScale(d.Country); }) // Assign color based on 'Country'
-        .on("mouseover", function(d) {
+        .attr("cx", function(d) { return xScale(new Date(d.Year, d.Month - 1, 1)); })
+        .attr("cy", function(d) { return yScale(Math.max(1, d.Total_Affected)); })
+        .attr("r", 3)
+        .attr("fill", function(d) { return colorScale(d.Country); })
+        .on("mouseover", function(event, d) {
             // Show tooltip on mouseover
             tooltip.transition()
                 .duration(200)
-                .style("opacity", 0.9);
-            tooltip.html(
-                "Country: " + d.Country + "<br>" +
-                "Disaster Type: " + d.Disaster_Type + "<br>" +
-                "Total Affected: " + d.Total_Affected
-            )
-                .style("left", (d3.event.pageX + 5) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
+                .style("opacity", .9);
+            tooltip.html("Country: " + d.Country + "<br/>Disaster Type: " + d.Disaster_Type + "<br/>Population Affected: " + d.Total_Affected)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
         })
-        .on("mouseout", function(d) {
+        .on("mouseout", function() {
             // Hide tooltip on mouseout
             tooltip.transition()
                 .duration(500)
                 .style("opacity", 0);
         });
+
+    // Create a tooltip for showing information on hover
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
     // Add x-axis with appropriate tick values
     svg.append("g")

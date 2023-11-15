@@ -181,7 +181,7 @@ d3.csv('./1970-2021_DISASTERS_UPDATED_COUNTRIES.csv').then(function (dataset) {
 
   drawRowBar('#totalDeath', totalValues, 'totalDeathsValue');
 
-  drawRowBar('#totalAffected', totalValues, 'totalAffectedValue');
+  // drawRowBar('#totalAffected', totalValues, 'totalAffectedValue');
 
   drawRowBar('#totalDamages', totalValues, 'totalDamagesValue');
 
