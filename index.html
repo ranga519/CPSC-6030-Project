@@ -1,91 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!--Overhead stuff-->
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSPC 6030 Data Disualization Project</title>
-    <link rel="icon" href="something.png">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="./bar_chart.css">
-    <title>Project</title>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-  </head>
-    <h1>
-      Natural Disasters (1970-2023)<br />
-      <span class="bold">Where and from which disasters do people get most affected? </span>
-      </h1>
+<head>
+  <!-- Overhead stuff -->
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSPC 6030 Data Visualization Project</title>
+  <link rel="icon" href="something.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./bar_chart.css">
+  <title>Project</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
 
+<h1>
+  Natural Disasters (1970-2023)<br />
+  <span class="bold">Where and from which disasters do people get most affected? </span>
+</h1>
 
-    <table style="width:90%">
-      <tr>
-        <td id="q1-container" colspan="2">
-          <svg id="map"></svg>
-        </td>
-        <td id="q2-container">
-          <svg id="scatterplot"></svg>
-        </td>
-      </tr>
-
-  <!--     <tr>
-        <td id="q3-container">
-          <svg id="q3-viz"></svg>
-        </td>
-        <td id="q4-container">
-          <svg id="q4-viz"></svg>
-        </td>
-        <td id="year-container">
-          <svg id="year"></svg>
-        </td>
-      </tr> -->
-    </table>
-
-
-    <!-- <div class="bar-wrap">
-      <div class="totalAffected-wrap value-wrap">
-        <div class="total-head">Total Affected</div>
-        <div class="totalAffected-content value-content">
-          <svg id="totalAffected"></svg>
-        </div>
-      </div> -->
-
+<table style="width:100%">
+  <tr>
+    <td id="q1-container">
+      <svg id="map"></svg>
+    </td>
+    <td id="q2-container">
+      <svg id="scatterplot"></svg>
+    </td>
+  </tr>
+  <tr>
+    <td id="q3-container" colspan="3">
+      <svg id="bubble"></svg>
+    </td>
+  </tr>
+  <tr>
+    <td id="q4-container">
       <div class="totalDeath-wrap value-wrap">
         <div class="total-head">Total Deaths</div>
         <div class="totalDeath-content value-content">
           <svg id="totalDeath"></svg>
         </div>
       </div>
-  </div>
-
-   <div class="bar-wrap mt mb">
-     <div class="totalDamages-wrap value-wrap">
-       <div class="total-head">Total Damages</div>
-       <div class="totalDamages-content value-content">
-         <svg id="totalDamages"></svg>
+    </td>
+    <td id="q5-container">
+      <div class="bar-wrap mt mb">
+        <div class="totalDamages-wrap value-wrap">
+          <div class="total-head">Total Damages</div>
+          <div class="totalDamages-content value-content">
+            <svg id="totalDamages"></svg>
+          </div>
         </div>
       </div>
+    </td>
+  </tr>
+</table>
 
-    </div>
-      
-      <!--Team Members info-->
-      <h5>
-        Team Description.<br>
-        <ul>
-          <li>Ranga Baminiwatte - <a href="mailto:abamini@g.clemson.edu">@abamini@clemson.edu</a><br></li>
-          <li>Fardifa Fathmiul Alam - <a href="mailto:fardifa@g.clemson.edu">@fardifa@g.clemson.edu</a><br></li>
-          <li>Taoli Wuyun - <a href="mailto:@g.clemson.edu">@twuyun@g.clemson.edu</a><br></li>
-        </ul>
-      </h5>
-      <div id="tooltip-div"></div>
-    <!--Credits-->    
-    <footer>
-      <a href="https://www.kaggle.com/datasets/aungpyaeap/supermarket-sales" title="1970-2021_DISASTERS (Source: Kaggle)" target="_blank">supermarket-sales (Source: Kaggle)</a><br>
-    </footer>
+<!-- Team Members info -->
+<h5>
+  Team Description.<br>
+  <ul>
+    <li>Ranga Baminiwatte - <a href="mailto:abamini@g.clemson.edu">@abamini@clemson.edu</a><br></li>
+    <li>Fardifa Fathmiul Alam - <a href="mailto:fardifa@g.clemson.edu">@fardifa@g.clemson.edu</a><br></li>
+    <li>Taoli Wuyun - <a href="mailto:@g.clemson.edu">@twuyun@g.clemson.edu</a><br></li>
+  </ul>
+</h5>
+<div id="tooltip-div"></div>
 
-    <!--Scripts-->
-    <script src="map.js"></script>
-    <script src="scatter_plot.js"></script>
-    <script src="./bar_chart.js"></script>
+<!-- Credits -->
+<footer>
+  <a href="https://www.kaggle.com/datasets/brsdincer/all-natural-disasters-19002021-eosdis/" title="1970-2021_DISASTERS (Source: Kaggle)" target="_blank">1970-2021_DISASTERS (Source: Kaggle)</a><br>
+</footer>
 
-  </body>
+<!-- Scripts -->
+<script src="map.js"></script>
+<script src="scatter_plot.js"></script>
+<script src="./bar_chart.js"></script>
+<script src="bubble_chart.js"></script>
+
+</body>
 </html>

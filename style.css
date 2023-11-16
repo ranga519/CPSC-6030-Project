@@ -49,17 +49,19 @@ tr {
     width: 100%;
 }
 
-#q3-container, #q1-container, #q4-container, #q2-container, #year-container {
+#q3-container, #q1-container, #q4-container, #q2-container {
     width: 30%;
-    height: 48vh;
+    height: -10vh;
 }
 
 #q3-container {
     width: 70%;
+    height: 0vh;
 }
 
-#q4-container, #q2-container, #year-container {
+#q4-container, #q2-container {
     width: 33%;
+    height: -10vh;
 }
 
 h5 {
@@ -103,5 +105,5 @@ footer {
     padding-top: 10px;
     padding-bottom: 10px;
     font-size: small;
-    margin-bottom: -8px;
+    margin-bottom: -600px;
 }

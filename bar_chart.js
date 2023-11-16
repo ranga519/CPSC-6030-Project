@@ -2,7 +2,7 @@
  * 
  * @returns 
  */
- function getTotalValues(rawData) {
+function getTotalValues(rawData) {
   var _totalValues = [];
 
   for (let i = 0, len = rawData.length; i < len; i++) {
@@ -42,62 +42,7 @@
  * @param {*} totalValues all data
  * @param {*} valueName target data
  */
-function drawColBar(targetId, totalValues, valueName) {
-  var _totalValues = totalValues.sort((a, b) => b[valueName] - a[valueName]);
 
-  var colBarConfig = {
-    width: 31800,
-    height: 400,
-    margin: { top: 20, right: 30, bottom: 40, left: 100 },
-  };
-  var chartWidth = colBarConfig.width - colBarConfig.margin.left - colBarConfig.margin.right;
-  var chartHeight = colBarConfig.height - colBarConfig.margin.top - colBarConfig.margin.bottom;
-
-  var svg = d3
-    .select(targetId)
-    .attr('width', colBarConfig.width)
-    .attr('height', colBarConfig.height);
-  var chart = svg
-    .append('g')
-    .attr('transform', `translate(${colBarConfig.margin.left}, ${colBarConfig.margin.top})`);
-
-  var xScale = d3
-    .scaleBand()
-    .domain(_totalValues.map((d) => d.country))
-    .range([0, chartWidth])
-    .padding(0.4);
-
-  var yScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(_totalValues, (d) => Math.max(d[valueName]))])
-    .range([chartHeight, 0]);
-
-  var xAxis = d3.axisBottom(xScale);
-
-  var yAxis = d3.axisLeft(yScale);
-
-  chart.append('g').attr('transform', `translate(0, ${chartHeight})`).call(xAxis);
-
-  chart.append('g').call(yAxis);
-
-  var bars = chart
-    .selectAll('.bar')
-    .data(_totalValues)
-    .enter()
-    .append('g')
-    .attr('class', 'bar')
-    .attr('transform', function (d) {
-      return `translate(${xScale(d.country) - 90},0)`;
-    });
-
-  bars
-    .append('rect')
-    .attr('x', xScale.bandwidth())
-    .attr('y', (d) => yScale(d[valueName]))
-    .attr('width', xScale.bandwidth())
-    .attr('height', (d) => chartHeight - yScale(d[valueName]))
-    .style('fill', 'skyblue');
-}
 
 /**
  * draw horizontal barchart
@@ -112,10 +57,10 @@ function drawRowBar(targetId, totalValues, valueName) {
   var svg = d3
     .select(targetId)
     .attr('width', 500) // width
-    .attr('height', 4999); // height
+    .attr('height', 400); // height
 
   // define drawing area
-  var margin = { left: 250, right: 150, top: 20, bottom: 20 };
+  var margin = { left: 210, right: 150, top: 20, bottom: 20 };
   var width = +svg.attr('width') - margin.left - margin.right;
   var height = +svg.attr('height') - margin.top - margin.bottom;
 
@@ -140,10 +85,23 @@ function drawRowBar(targetId, totalValues, valueName) {
     .append('rect')
     .attr('x', 0) // left
     .attr('y', (d) => yScale(d.country))
-    .attr('width', (d) => xScale(d[valueName]))
+    .attr('width', (d) => xScale(d[valueName]+1))
     .attr('height', yScale.bandwidth())
     .style('fill', '#2C608A');
-
+  function formatTickValue(value) {
+      if (value >= 1e6) {
+        return (value / 1e6).toFixed(0) + 'M';
+      } else if (value >= 1e3) {
+        return (value / 1e3).toFixed(0) + 'K';
+      }
+      return value;
+  }
+  var customTicks = xScale.ticks(3).slice(1, 3);
+    //add x axis
+  var xAxis = d3.axisBottom(xScale).tickValues(customTicks).tickFormat(formatTickValue);
+    g.append('g')
+      .attr('transform', `translate(0, ${height})`)
+      .call(xAxis);
   // add countries name
   g.selectAll('text.country-label')
     .data(_totalValues)
@@ -156,34 +114,23 @@ function drawRowBar(targetId, totalValues, valueName) {
     .text((d) => d.country)
     .style('text-anchor', 'end')
     .style('fill', '#778E9E');
-
-  // add value
-  g.selectAll('text.value-label')
-    .data(_totalValues)
-    .enter()
-    .append('text')
-    .attr('class', 'value-label')
-    .attr('x', (d) => xScale(d[valueName]) + 5) // adjust right side
-    .attr('y', (d) => yScale(d.country) + yScale.bandwidth() / 2)
-    .attr('dy', '0.35em')
-    .text((d) => d[valueName]);
 }
 
 
 d3.csv('./1970-2021_DISASTERS_UPDATED_COUNTRIES.csv').then(function (dataset) {
   var totalValues = getTotalValues(dataset);
 
-  // totalValues.forEach((item) => {
-  // item.totalDeathsValue += 10000;
-  // console.log(item.totalAffectedValue);
-  // });
-  // console.log('totalValues', totalValues);
+  console.log('totalValues', totalValues);
 
-  drawRowBar('#totalDeath', totalValues, 'totalDeathsValue');
+  totalValues.sort((a, b) => b['totalDeathsValue'] - a['totalDeathsValue']);
+  var top10Items1 = totalValues.slice(0, 10);
+  totalValues.sort((a, b) => b['totalDamagesValue'] - a['totalDamagesValue']);
+  var top10Items2 = totalValues.slice(0, 10);
+  console.log('totalValue2222s', totalValues);
 
-  // drawRowBar('#totalAffected', totalValues, 'totalAffectedValue');
 
-  drawRowBar('#totalDamages', totalValues, 'totalDamagesValue');
+  drawRowBar('#totalDeath', top10Items1, 'totalDeathsValue');
+  drawRowBar('#totalDamages', top10Items2, 'totalDamagesValue');
 
 
 });
