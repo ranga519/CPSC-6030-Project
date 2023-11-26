@@ -3,11 +3,11 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     // Define dimensions for the chart area
     var dimensions = {
         width: 600,
-        height: 400,
+        height: 300,
         margin: {
             top: 10,
             bottom: 50,
-            right: 80,
+            right: 120,
             left: 70
         }
     };
@@ -23,7 +23,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         };
     });
 
-    // Define a color scale for different countries
+    // Define a color scale for different disaster types
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
     // Create an SVG element to contain the scatter plot
@@ -45,7 +45,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     // Create y-axis with appropriate tick values using a logarithmic scale and custom tick format
     var yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d3.format(".2s"));
 
-    // Create circles for each data point, assigning colors based on 'Country'
+    // Create circles for each data point, assigning colors based on 'Disaster_Type'
     var dots = svg.selectAll("circle")
         .data(data)
         .enter()
@@ -53,7 +53,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         .attr("cx", function(d) { return xScale(new Date(d.Year, d.Month - 1, 1)); })
         .attr("cy", function(d) { return yScale(Math.max(1, d.Total_Affected)); })
         .attr("r", 3)
-        .attr("fill", function(d) { return colorScale(d.Country); })
+        .attr("fill", function(d) { return colorScale(d.Disaster_Type); }) // Change to Disaster_Type
         .on("mouseover", function(event, d) {
             // Show tooltip on mouseover
             tooltip.transition()
@@ -102,4 +102,35 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         .attr("x", 0 - dimensions.height / 2)
         .style("text-anchor", "middle")
         .text("Population Affected");
+
+    // Add a color legend
+    var legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(" + (dimensions.width - dimensions.margin.right + 10) + "," + dimensions.margin.top + ")");
+
+    var legendRectSize = 18;
+    var legendSpacing = 4;
+
+    var legendItems = legend.selectAll(".legend-item")
+        .data(colorScale.domain())
+        .enter()
+        .append("g")
+        .attr("class", "legend-item")
+        .attr("transform", function(d, i) {
+            var height = legendRectSize + legendSpacing;
+            var offset = height * colorScale.domain().length / 2;
+            var horz = 0; // Adjusted to prevent overlapping with the scatter plot
+            var vert = i * height - offset;
+            return "translate(" + horz + "," + vert + ")";
+        });
+
+    legendItems.append("rect")
+        .attr("width", legendRectSize)
+        .attr("height", legendRectSize)
+        .style("fill", colorScale);
+
+    legendItems.append("text")
+        .attr("x", legendRectSize + legendSpacing)
+        .attr("y", legendRectSize - legendSpacing)
+        .text(function(d) { return d; });
 });

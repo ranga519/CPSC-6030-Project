@@ -15,8 +15,8 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
 
     // SVG dimensions
     var dimensions = {
-        width: 800,
-        height: 400
+        width: 600,
+        height: 300
     };
 
     // Create SVG container
@@ -41,10 +41,8 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     var root = d3.hierarchy({children: disasterData})
                  .sum(function(d) { return radiusScale(d.count); }); // Size of each bubble
 
-    // Color scale (logarithmic)
-    var colorScale = d3.scaleLinear()
-                       .domain([Math.log(minCount) + 1, Math.log(maxCount)])
-                       .range(["#A7BED7", "#263f91"]);
+    var colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+                 .domain(disasterData.map(function(d) { return d.name; }));
 
     // Build the bubbles
     var node = svg2.selectAll(".node")

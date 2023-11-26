@@ -56,12 +56,15 @@ tr {
 
 #q3-container {
     width: 70%;
-    height: 0vh;
+    height: 10vh;
+    top: 50%;
+    left: 100%;
+
 }
 
-#q4-container, #q2-container {
-    width: 33%;
-    height: -10vh;
+ #q2-container {
+    width: 55%;
+    height: -700vh;
 }
 
 h5 {
