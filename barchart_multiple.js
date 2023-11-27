@@ -10,27 +10,27 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         }
     };
     // Create a div element for the tooltip
-var sliced = 195
-var tooltip = d3.select("body").append("div")
-                .attr("class", "tooltip")
-                .style("opacity", 0)
-                .style("position", "absolute")
-                .style("padding", "10px")
-                .style("background", "lightgrey")
-                .style("border", "1px solid black")
-                .style("border-radius", "5px")
-                .style("pointer-events", "none")
-                .style("text-align", "left")
-                .style("display", "none"); // Initially hidden
+    var sliced = 150
+    var tooltip = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0)
+                    .style("position", "absolute")
+                    .style("padding", "10px")
+                    .style("background", "lightgrey")
+                    .style("border", "1px solid black")
+                    .style("border-radius", "5px")
+                    .style("pointer-events", "none")
+                    .style("text-align", "left")
+                    .style("display", "none"); // Initially hidden
 
-// Additional setup for drawing lines
-var lineGroup = d3.select("body").append("svg")
-                  .attr("width", "100%")
-                  .attr("height", "630px")
-                  .style("position", "absolute")
-                  .style("top", "0")
-                  .style("left", "0")
-                  .style("pointer-events", "none"); // Ignore pointer events on this SVG
+    // Additional setup for drawing lines
+    var lineGroup = d3.select("body").append("svg")
+                    .attr("width", "100%")
+                    .attr("height", "700px")
+                    .style("position", "absolute")
+                    .style("top", "0")
+                    .style("left", "0")
+                    .style("pointer-events", "none"); // Ignore pointer events on this SVG
 
 
 
@@ -64,9 +64,12 @@ var lineGroup = d3.select("body").append("svg")
 
     // Select the top 75 countries
     var topCountriesDisasters = countriesDataDisasters.slice(0,sliced);
+    var topXCountries = new Set(topCountriesDisasters.map(d => d.country));
 
     // Now, 'topCountries' contains the top 75 countries sorted by the count of natural disasters
     console.log(topCountriesDisasters);
+
+ 
 
     // Create an array of objects for each country and its count of deaths
     var countriesDataDeaths = Object.keys(totalDeathsByCountry).map(function(country) {
@@ -79,9 +82,9 @@ var lineGroup = d3.select("body").append("svg")
     });
 
     // Select the top 75 countries
-    var topCountriesDeaths = countriesDataDeaths.slice(0,sliced);
+    // var topCountriesDeaths = countriesDataDeaths.slice(0,sliced);
 
-    console.log(topCountriesDeaths);
+    // console.log(topCountriesDeaths);
 
     // Create an array of objects for each country and its count of damages
     var countriesDataDamages = Object.keys(totalDamagesByCountry).map(function(country) {
@@ -93,10 +96,14 @@ var lineGroup = d3.select("body").append("svg")
         return b.count - a.count;
     });
 
-    // Select the top 75 countries
-    var topCountriesDamages = countriesDataDamages.slice(0,sliced);
+    // Filter deaths and damages data to include only top 100 countries
+    var filteredCountriesDataDeaths = countriesDataDeaths.filter(d => topXCountries.has(d.country));
+    var filteredCountriesDataDamages = countriesDataDamages.filter(d => topXCountries.has(d.country));
 
-    console.log(topCountriesDamages);
+    // Select the top 75 countries
+    // var topCountriesDamages = countriesDataDamages.slice(0,sliced);
+
+    // console.log(topCountriesDamages);
 
     // ...
 
@@ -127,8 +134,8 @@ charts.push(chart1, chart2, chart3);
 // Inside your d3.csv promise block:
 // Calculate ranks for all three datasets
 calculateRanks(topCountriesDisasters, 'disasters');
-calculateRanks(topCountriesDeaths, 'deaths');
-calculateRanks(topCountriesDamages, 'damages');
+calculateRanks(filteredCountriesDataDeaths, 'deaths');
+calculateRanks(filteredCountriesDataDamages, 'damages');
 
 // ...
 
@@ -167,10 +174,10 @@ function drawLines(country) {
 
      // Adjust X-positions to make the lines shorter and more to the left
      var chartWidth = dimensions.width + dimensions.margin.left + dimensions.margin.right;
-     var xStartDisasters = dimensions.margin.left + dimensions.width / 2 - 90; // Adjust this value as needed
-     var xEndDisasters = xStartDisasters + chartWidth / 2 + 50; // Adjust this value as needed
+     var xStartDisasters = dimensions.margin.left + dimensions.width / 2 - 95; // Adjust this value as needed
+     var xEndDisasters = xStartDisasters + chartWidth / 2 + 60; // Adjust this value as needed
      var xStartDeaths = xEndDisasters;
-     var xEndDeaths = xStartDeaths + chartWidth / 2 + 100; // Adjust this value as needed
+     var xEndDeaths = xStartDeaths + chartWidth / 2 + 80; // Adjust this value as needed
  
 
     // Draw lines between charts
@@ -267,13 +274,13 @@ function createBarChart(svgId, data, allCharts, yScale) {
 }
 // Create yScales for each chart
 var yScaleDisasters = d3.scaleBand().domain(topCountriesDisasters.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
-var yScaleDeaths = d3.scaleBand().domain(topCountriesDeaths.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
-var yScaleDamages = d3.scaleBand().domain(topCountriesDamages.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
+var yScaleDeaths = d3.scaleBand().domain(filteredCountriesDataDeaths.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
+var yScaleDamages = d3.scaleBand().domain(filteredCountriesDataDamages.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
 
 // Create bar charts for natural disasters, deaths, and damages
 createBarChart("disasters", topCountriesDisasters, charts, yScaleDisasters);
-createBarChart("deaths", topCountriesDeaths, charts, yScaleDeaths);
-createBarChart("damages", topCountriesDamages, charts, yScaleDamages);
+    createBarChart("deaths", filteredCountriesDataDeaths, charts, yScaleDeaths);
+    createBarChart("damages", filteredCountriesDataDamages, charts, yScaleDamages);
 
 // ...
 
