@@ -227,6 +227,7 @@ function createBarChart(svgId, data, allCharts, yScale) {
         .attr("width", function(d) { return xScale(d.count); })
         .attr("height", yScale.bandwidth())
         .attr("fill", "steelblue")
+        
         .on("mouseenter", function(event, d) {
             // Set the currently hovered country
             hoveredCountry = d.country;
@@ -254,10 +255,19 @@ function createBarChart(svgId, data, allCharts, yScale) {
                     .attr("stroke", "none");
             });
 
-            // Hide tooltip on mouseout
+                        // Hide tooltip on mouseout
             hideTooltip();
             removeLines();
+        }) // This closing parenthesis and semicolon should be here
+        .on("click", function(event, d) {
+            // Filter the scatter plot dots based on the selected country
+            window.updateScatterPlot([{
+                key: 'Country',
+                value: d.country
+            }]);
         });
+
+
 
     // Add Y-axis labels
     barsGroup.selectAll(".y-label")

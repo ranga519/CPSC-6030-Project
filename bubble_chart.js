@@ -1,3 +1,4 @@
+
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     // Count occurrences of each disaster type
     var disasterFrequency = {};
@@ -15,8 +16,8 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
 
     // SVG dimensions
     var dimensions = {
-        width: 600,
-        height: 300
+        width: 300,
+        height: 400
     };
 
     // Create SVG container
@@ -77,5 +78,39 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
           .style("font-size", "8px") // Reset font size on mouseout
           .attr("dy", "0.3em");
     });
+
+// // Add interaction for bubbles
+// node.on("click", function(event, d) {
+//     // Filter data based on the selected natural disaster type
+//     var filteredData = dataset.filter(function(data) {
+//         return data['Disaster_Type'] === d.data.name;
+//     });
+
+//     // Update the scatter plot with the filtered data
+//     updateScatterPlot(filteredData);
+// });
+// Add interaction for bubbles
+node.on("click", function(event, d) {
+    // Reset all bubbles to their original size and color
+       svg2.selectAll("circle")
+       .attr("r", function(d) { return d.r; })
+       .style("fill", function(d) { return colorScale(Math.log(d.data.count)); });
+    // Enhance the clicked bubble
+        var clickedBubble = d3.select(this).select("circle");
+    // Adjust the size or color as needed
+    clickedBubble
+        .transition()
+        .duration(500)
+        .attr("r", function(d) { return d.r * 1.5; })  // Increase the radius by 50%
+
+    
+    // Filter the scatter plot dots based on the selected country
+    window.updateScatterPlot([{
+        key: 'Disaster_Type',
+        value: d.data.name
+
+    }]);
+});
+
 
 });

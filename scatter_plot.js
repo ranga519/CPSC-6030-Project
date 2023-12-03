@@ -2,12 +2,12 @@
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     // Define dimensions for the chart area
     var dimensions = {
-        width: 600,
-        height: 300,
+        width: 900,
+        height: 500,
         margin: {
             top: 10,
             bottom: 50,
-            right: 120,
+            right: 100,
             left: 70
         }
     };
@@ -103,34 +103,64 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         .style("text-anchor", "middle")
         .text("Population Affected");
 
-    // Add a color legend
-    var legend = svg.append("g")
-        .attr("class", "legend")
-        .attr("transform", "translate(" + (dimensions.width - dimensions.margin.right + 10) + "," + dimensions.margin.top + ")");
+// // Add a color legend
+// var legend = svg.append("g")
+//     .attr("class", "legend")
+//     .attr("transform", "translate(" + (dimensions.width - dimensions.margin.right + 10) + "," + dimensions.margin.top + ")");
 
-    var legendRectSize = 18;
-    var legendSpacing = 4;
+//     var legendRectSize = 18;
+//     var legendSpacing = 4;
 
-    var legendItems = legend.selectAll(".legend-item")
-        .data(colorScale.domain())
-        .enter()
-        .append("g")
-        .attr("class", "legend-item")
-        .attr("transform", function(d, i) {
-            var height = legendRectSize + legendSpacing;
-            var offset = height * colorScale.domain().length / 2;
-            var horz = 0; // Adjusted to prevent overlapping with the scatter plot
-            var vert = i * height - offset;
-            return "translate(" + horz + "," + vert + ")";
+//     var legendItems = legend.selectAll(".legend-item")
+//         .data(colorScale.domain())
+//         .enter()
+//         .append("g")
+//         .attr("class", "legend-item")
+//         .attr("transform", function(d, i) {
+//             var height = legendRectSize + legendSpacing;
+//             var offset = height * colorScale.domain().length / 2;
+//             var horz = 0; // Adjusted to prevent overlapping with the scatter plot
+//             var vert = i * height - offset;
+//             return "translate(" + horz + "," + vert + ")";
+//         })
+//         .on("click", function (selectedType) {
+//             // Toggle visibility of dots based on the selected disaster type
+//             dots.attr("display", function(d) {
+//                 return (d.Disaster_Type === selectedType) ? null : "none";
+//             });
+//             console.log(selectedType)
+//             console.log(selectedType)
+//         });
+
+//     legendItems.append("rect")
+//         .attr("width", legendRectSize)
+//         .attr("height", legendRectSize)
+//         .style("fill", colorScale);
+
+//     legendItems.append("text")
+//         .attr("x", legendRectSize + legendSpacing)
+//         .attr("y", legendRectSize - legendSpacing)
+//         .style("font-size", "10px")
+//         .text(function(d) { return d; });
+    
+    var resetButton = d3.select("body")
+        .append("button")
+        .text("Reset Filtrations")
+        .on("click", function () {
+            // Reset the visibility of all dots
+            dots.attr("display", null);
         });
 
-    legendItems.append("rect")
-        .attr("width", legendRectSize)
-        .attr("height", legendRectSize)
-        .style("fill", colorScale);
+    window.updateScatterPlot = function(filters) {
+    // Reset the visibility of all dots
+        dots.attr("display", null);
 
-    legendItems.append("text")
-        .attr("x", legendRectSize + legendSpacing)
-        .attr("y", legendRectSize - legendSpacing)
-        .text(function(d) { return d; });
+    // Apply the specified filters
+     filters.forEach(function(filter) {
+            dots.filter(function(d) {
+                return d[filter.key] !== filter.value;
+        }).attr("display", "none");
+    });
+}  
 });
+
