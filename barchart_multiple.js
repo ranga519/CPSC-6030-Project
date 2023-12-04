@@ -1,16 +1,16 @@
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     var dimensions = {
-        width: 250,
-        height: 630,
+        width: 260,
+        height: 590,
         margin: {
-            top: 10,
+            top: 15,
             bottom: 10,
             left: 100,
             right: 10
         }
     };
     // Create a div element for the tooltip
-    var sliced = 150
+    var sliced = 100
     var tooltip = d3.select("body").append("div")
                     .attr("class", "tooltip")
                     .style("opacity", 0)
@@ -21,7 +21,47 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
                     .style("border-radius", "5px")
                     .style("pointer-events", "none")
                     .style("text-align", "left")
+                    .style("font-size", "8px")
                     .style("display", "none"); // Initially hidden
+    // Create three tooltip divs for each chart
+var tooltipDisasters = d3.select("body").append("div")
+                         .attr("class", "tooltip")
+                         .style("opacity", 0)
+                         .style("position", "absolute")
+                         .style("padding", "10px")
+                         .style("background", "lightgrey")
+                         .style("border", "1px solid black")
+                         .style("border-radius", "5px")
+                         .style("pointer-events", "none")
+                         .style("text-align", "left")
+                         .style("font-size", "12px")
+                         .style("display", "none");
+
+var tooltipDeaths = d3.select("body").append("div")
+                      .attr("class", "tooltip")
+                      .style("opacity", 0)
+                      .style("position", "absolute")
+                      .style("padding", "10px")
+                      .style("background", "lightgrey")
+                      .style("border", "1px solid black")
+                      .style("border-radius", "5px")
+                      .style("pointer-events", "none")
+                      .style("text-align", "left")
+                      .style("font-size", "12px")
+                      .style("display", "none");
+
+var tooltipDamages = d3.select("body").append("div")
+                       .attr("class", "tooltip")
+                       .style("opacity", 0)
+                       .style("position", "absolute")
+                       .style("padding", "10px")
+                       .style("background", "lightgrey")
+                       .style("border", "1px solid black")
+                       .style("border-radius", "5px")
+                       .style("pointer-events", "none")
+                       .style("text-align", "left")
+                       .style("font-size", "12px")
+                       .style("display", "none");
 
     // Additional setup for drawing lines
     var lineGroup = d3.select("body").append("svg")
@@ -106,6 +146,12 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     // console.log(topCountriesDamages);
 
     // ...
+    // Sort the filtered datasets alphabetically
+    var alphabeticalCountriesDisasters = [...topCountriesDisasters].sort((a, b) => a.country.localeCompare(b.country));
+    var alphabeticalCountriesDeaths = [...filteredCountriesDataDeaths].sort((a, b) => a.country.localeCompare(b.country));
+    var alphabeticalCountriesDamages = [...filteredCountriesDataDamages].sort((a, b) => a.country.localeCompare(b.country));
+
+    console.log(alphabeticalCountriesDamages)
 
 // Global variable to store ranks of countries
 var countryRanks = {};
@@ -143,30 +189,117 @@ calculateRanks(filteredCountriesDataDamages, 'damages');
 var hoveredCountry = null;
 
 // Function to show the tooltip
-function showTooltip(event, country) {
-    var tooltipHtml = country + "<br>Disasters Rank: " + countryRanks.disasters[country] +
-        "<br>Deaths Rank: " + countryRanks.deaths[country] +
-        "<br>Damages Rank: " + countryRanks.damages[country];
+// function showTooltip(event, country) {
+//     // var tooltipHtml = country + "<br>Disasters Rank: " + countryRanks.disasters[country] +
+//     //     "<br>Deaths Rank: " + countryRanks.deaths[country] +
+//     //     "<br>Damages Rank: " + countryRanks.damages[country];
+//     var tooltipHtml = "Disasters Rank: " + countryRanks.disasters[country] +
+//         "<br>Deaths Rank: " + countryRanks.deaths[country] +
+//         "<br>Damages Rank: " + countryRanks.damages[country];
 
-    tooltip.html(tooltipHtml)
-        .style("left", (event.pageX + 10) + "px")
-        .style("top", (event.pageY + 10) + "px")
+//     tooltip.html(tooltipHtml)
+//         .style("left", (event.pageX + 10) + "px")
+//         .style("top", (event.pageY + 10) + "px")
+//         .style("opacity", 1)
+//         .style("display", "block"); // Make the tooltip visible
+// }
+
+// Function to show tooltips for a given country
+function showTooltips(country, event) {
+    // Get the positions of the charts
+    var chart1Pos = chart1.node().getBoundingClientRect();
+    var chart2Pos = chart2.node().getBoundingClientRect();
+    var chart3Pos = chart3.node().getBoundingClientRect();
+
+    // Calculate Y-positions of the tooltips for each chart
+    var yDisasters = chart1Pos.top + yScaleDisasters(country) + yScaleDisasters.bandwidth() / 2;
+    var yDeaths = chart2Pos.top + yScaleDeaths(country) + yScaleDeaths.bandwidth() / 2;
+    var yDamages = chart3Pos.top + yScaleDamages(country) + yScaleDamages.bandwidth() / 2;
+
+    // Set a fixed horizontal position for each tooltip
+    var xPosition1 = chart1Pos.right - 70 ; // You can adjust this value as needed
+    var xPosition2 = chart2Pos.right - 70; 
+    var xPosition3 = chart3Pos.right - 70; 
+
+    // Update and show each tooltip with the rank for the hovered country
+    tooltipDisasters.html("Disasters Rank: " + countryRanks.disasters[country])
+        .style("left", xPosition1 + "px")
+        .style("top", yDisasters + "px")
         .style("opacity", 1)
-        .style("display", "block"); // Make the tooltip visible
+        .style("display", "block");
+
+    tooltipDeaths.html("Deaths Rank: " + countryRanks.deaths[country])
+        .style("left", xPosition2 + "px")
+        .style("top", yDeaths + "px")
+        .style("opacity", 1)
+        .style("display", "block");
+
+    tooltipDamages.html("Damages Rank: " + countryRanks.damages[country])
+        .style("left", xPosition3 + "px")
+        .style("top", yDamages + "px")
+        .style("opacity", 1)
+        .style("display", "block");
 }
 
+function showTooltipsAlpha(country, event) {
+    // Get the positions of the charts
+    var chart1Pos = chart1.node().getBoundingClientRect();
+    var chart2Pos = chart2.node().getBoundingClientRect();
+    var chart3Pos = chart3.node().getBoundingClientRect();
+
+    // Calculate Y-positions of the tooltips for each chart
+    var yDisasters = chart1Pos.top + yScaleDisastersAlpha(country) + yScaleDisastersAlpha.bandwidth() / 2 - 20;
+    var yDeaths = chart2Pos.top + yScaleDeathsAlpha(country) + yScaleDeathsAlpha.bandwidth() / 2 - 20;
+    var yDamages = chart3Pos.top + yScaleDamagesAlpha(country) + yScaleDamagesAlpha.bandwidth() / 2 - 20;
+
+    // Set a fixed horizontal position for each tooltip
+    var xPosition1 = chart1Pos.right - 70 ; // You can adjust this value as needed
+    var xPosition2 = chart2Pos.right - 70; 
+    var xPosition3 = chart3Pos.right - 70; 
+
+    // Update and show each tooltip with the rank for the hovered country
+    tooltipDisasters.html("Disasters Rank: " + countryRanks.disasters[country])
+        .style("left", xPosition1 + "px")
+        .style("top", yDisasters + "px")
+        .style("opacity", 1)
+        .style("display", "block");
+
+    tooltipDeaths.html("Deaths Rank: " + countryRanks.deaths[country])
+        .style("left", xPosition2 + "px")
+        .style("top", yDeaths + "px")
+        .style("opacity", 1)
+        .style("display", "block");
+
+    tooltipDamages.html("Damages Rank: " + countryRanks.damages[country])
+        .style("left", xPosition3 + "px")
+        .style("top", yDamages + "px")
+        .style("opacity", 1)
+        .style("display", "block");
+}
+
+
+
+
+
 // Hide tooltip function
-function hideTooltip() {
-    tooltip.style("opacity", 0)
-        .style("display", "none"); // Hide the tooltip
+// function hideTooltip() {
+//     tooltip.style("opacity", 0)
+//         .style("display", "none"); // Hide the tooltip
+// }
+
+// Function to hide all tooltips
+function hideTooltips() {
+    tooltipDisasters.style("opacity", 0).style("display", "none");
+    tooltipDeaths.style("opacity", 0).style("display", "none");
+    tooltipDamages.style("opacity", 0).style("display", "none");
 }
 
 // Function to draw lines
 function drawLines(country) {
     // Calculate Y-positions of bars
-    var yDisasters = chart1.node().getBoundingClientRect().top + yScaleDisasters(country) + yScaleDisasters.bandwidth() / 2 + 10;
-    var yDeaths = chart2.node().getBoundingClientRect().top + yScaleDeaths(country) + yScaleDeaths.bandwidth() / 2 + 10;
-    var yDamages = chart3.node().getBoundingClientRect().top + yScaleDamages(country) + yScaleDamages.bandwidth() / 2 + 10;
+    var yDisasters = chart1.node().getBoundingClientRect().top + yScaleDisasters(country) + yScaleDisasters.bandwidth() / 2 + 15;
+    var yDeaths = chart2.node().getBoundingClientRect().top + yScaleDeaths(country) + yScaleDeaths.bandwidth() / 2 + 15;
+    var yDamages = chart3.node().getBoundingClientRect().top + yScaleDamages(country) + yScaleDamages.bandwidth() / 2 + 15;
 
     // X-positions (assuming charts are horizontally aligned)
     var x1 = dimensions.width;
@@ -175,7 +308,7 @@ function drawLines(country) {
      // Adjust X-positions to make the lines shorter and more to the left
      var chartWidth = dimensions.width + dimensions.margin.left + dimensions.margin.right;
      var xStartDisasters = dimensions.margin.left + dimensions.width / 2 - 95; // Adjust this value as needed
-     var xEndDisasters = xStartDisasters + chartWidth / 2 + 60; // Adjust this value as needed
+     var xEndDisasters = xStartDisasters + chartWidth / 2 + 80; // Adjust this value as needed
      var xStartDeaths = xEndDisasters;
      var xEndDeaths = xStartDeaths + chartWidth / 2 + 80; // Adjust this value as needed
  
@@ -192,22 +325,73 @@ function drawLines(country) {
         .attr("stroke", "black").attr("stroke-width", 2);
 }
 
+// Function to draw lines
+// ... your existing code ...
+
+// Function to draw straight lines between bars of the same country in alphabetical order
+function drawLinesAlpha(country) {
+    // Calculate Y-positions of bars
+    var yDisasters = chart1.node().getBoundingClientRect().top + yScaleDisastersAlpha(country) + yScaleDisastersAlpha.bandwidth() / 2 + 15;
+    var yDeaths = chart2.node().getBoundingClientRect().top + yScaleDeathsAlpha(country) + yScaleDeathsAlpha.bandwidth() / 2 + 15;
+    var yDamages = chart3.node().getBoundingClientRect().top + yScaleDamagesAlpha(country) + yScaleDamagesAlpha.bandwidth() / 2 + 15;
+
+    // X-positions (assuming charts are horizontally aligned)
+    var x1 = dimensions.width;
+    var x2 = dimensions.width * 2;
+
+     // Adjust X-positions to make the lines shorter and more to the left
+     var chartWidth = dimensions.width + dimensions.margin.left + dimensions.margin.right;
+     var xStartDisasters = dimensions.margin.left + dimensions.width / 2 - 95; // Adjust this value as needed
+     var xEndDisasters = xStartDisasters + chartWidth / 2 + 80; // Adjust this value as needed
+     var xStartDeaths = xEndDisasters + 20;
+     var xEndDeaths = xStartDeaths + chartWidth / 2 + 60; // Adjust this value as needed
+ 
+
+    // Draw lines between charts
+    lineGroup.append("line")
+        .attr("x1", xStartDisasters).attr("y1", yDisasters)
+        .attr("x2", xStartDeaths).attr("y2", yDeaths)
+        .attr("stroke", "black").attr("stroke-width", 2);
+
+    lineGroup.append("line")
+        .attr("x1", xStartDeaths).attr("y1", yDeaths)
+        .attr("x2", xEndDeaths).attr("y2", yDamages)
+        .attr("stroke", "black").attr("stroke-width", 2);
+}
+
+
 // Function to remove lines
 function removeLines() {
     lineGroup.selectAll("line").remove();
 }
 
-function createBarChart(svgId, data, allCharts, yScale) {
+function createBarChart(svgId, data, allCharts, titleText, isAlphabetical) {
     var svg = d3.select("#" + svgId)
         .style("width", dimensions.width)
         .style("height", dimensions.height);
 
     var barsGroup = svg.append("g")
         .attr("transform", "translate(" + dimensions.margin.left + "," + dimensions.margin.top + ")");
+    
+    // Add title
+    svg.append("text")
+        .attr("x", dimensions.margin.left) // Position the title
+        .attr("y", 12) // A little below the top edge of the SVG
+        .attr("text-anchor", "start")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .text(titleText); // Title text
+
+    var sortedData = isAlphabetical ? data.sort((a, b) => a.country.localeCompare(b.country)) : data;
 
     var xScale = d3.scaleLog()
         .domain([1, d3.max(data, function(d) { return d.count; })])
         .range([0, dimensions.width - dimensions.margin.left - dimensions.margin.right]);
+
+    var yScale = d3.scaleBand()
+        .domain(sortedData.map(d => d.country))
+        .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+        .padding(0.1);
 
     // var yScale = d3.scaleBand()
     //     .domain(data.map(function(d) { return d.country; }))
@@ -218,6 +402,15 @@ function createBarChart(svgId, data, allCharts, yScale) {
         d.rank = index + 1;
     });
 
+    var currentTooltip;
+    if (svgId === "disasters") {
+        currentTooltip = tooltipDisasters;
+    } else if (svgId === "deaths") {
+        currentTooltip = tooltipDeaths;
+    } else {
+        currentTooltip = tooltipDamages;
+    }
+
     barsGroup.selectAll("rect")
         .data(data)
         .enter()
@@ -226,7 +419,7 @@ function createBarChart(svgId, data, allCharts, yScale) {
         .attr("y", function(d) { return yScale(d.country); })
         .attr("width", function(d) { return xScale(d.count); })
         .attr("height", yScale.bandwidth())
-        .attr("fill", "steelblue")
+        .attr("fill", "purple")
         
         .on("mouseenter", function(event, d) {
             // Set the currently hovered country
@@ -242,9 +435,36 @@ function createBarChart(svgId, data, allCharts, yScale) {
                     .attr("stroke-width", 1.5);
             });
 
-            showTooltip(event, hoveredCountry)
-            drawLines(hoveredCountry);
+            // showTooltips(d.country, event);
+
+            // drawLines(hoveredCountry);
+
+            if (isAlphabetical) {
+                showTooltipsAlpha(d.country, event); // Use a different tooltip function for alphabetical view
+                drawLinesAlpha(d.country); // Use a different line drawing function for alphabetical view
+            } else {
+                showTooltips(d.country, event); // Existing tooltip function for rank view
+                drawLines(d.country); // Existing line drawing function for rank view
+            }
+
+
+             // Apply blur effect to all country labels in all charts
+            charts.forEach(chart => {
+                chart.selectAll(".y-label")
+                    .style("opacity", 0.5); // Dimming effect
+            });
+
+        // Highlight the hovered country label in all charts
+        charts.forEach(chart => {
+            chart.selectAll(".y-label")
+                .filter(function(label) { return label.country === d.country; })
+                .style("font-weight", "bold")
+                .style("font-size", "8px")
+                .style("opacity", 1); // Remove dimming for the selected country
+            });
+
         })
+
         .on("mouseleave", function(d) {
             // Clear the currently hovered country
             hoveredCountry = null;
@@ -255,9 +475,17 @@ function createBarChart(svgId, data, allCharts, yScale) {
                     .attr("stroke", "none");
             });
 
-                        // Hide tooltip on mouseout
-            hideTooltip();
+            // Hide tooltip on mouseout
+            hideTooltips();
             removeLines();
+
+                // Reset country labels to original style in all charts
+            charts.forEach(chart => {
+                chart.selectAll(".y-label")
+                    .style("font-weight", "normal")
+                    .style("font-size", "6px")
+                    .style("opacity", 1);
+        });
         }) // This closing parenthesis and semicolon should be here
         .on("click", function(event, d) {
             // Filter the scatter plot dots based on the selected country
@@ -279,24 +507,65 @@ function createBarChart(svgId, data, allCharts, yScale) {
         .attr("y", function(d) { return yScale(d.country) + yScale.bandwidth() / 2; })
         .attr("dy", "0.35em")
         .attr("text-anchor", "end")
-        .style("font-size", "7px")
+        .style("font-size", "6px")
+        .style("fill", "black")
         .text(function(d) { return d.country; });
 }
 // Create yScales for each chart
+
 var yScaleDisasters = d3.scaleBand().domain(topCountriesDisasters.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
 var yScaleDeaths = d3.scaleBand().domain(filteredCountriesDataDeaths.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
 var yScaleDamages = d3.scaleBand().domain(filteredCountriesDataDamages.map(d => d.country)).range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom]).padding(0.1);
 
-// Create bar charts for natural disasters, deaths, and damages
-createBarChart("disasters", topCountriesDisasters, charts, yScaleDisasters);
-    createBarChart("deaths", filteredCountriesDataDeaths, charts, yScaleDeaths);
-    createBarChart("damages", filteredCountriesDataDamages, charts, yScaleDamages);
 
-// ...
+var yScaleDisastersAlpha = d3.scaleBand()
+    .domain(alphabeticalCountriesDisasters.map(d => d.country))
+    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+    .padding(0.1);
+
+var yScaleDeathsAlpha = d3.scaleBand()
+    .domain(alphabeticalCountriesDeaths.map(d => d.country))
+    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+    .padding(0.1);
+
+    var yScaleDamagesAlpha = d3.scaleBand()
+    .domain(alphabeticalCountriesDamages.map(d => d.country))
+    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+    .padding(0.1);
+
+// Function to clear existing charts
+function clearCharts() {
+    d3.select("#disasters").selectAll("*").remove();
+    d3.select("#deaths").selectAll("*").remove();
+    d3.select("#damages").selectAll("*").remove();
+}
+// Function to update charts
+function updateCharts(isAlphabetical) {
+
+    clearCharts();
+
+    if (isAlphabetical) {
+        createBarChart("disasters", alphabeticalCountriesDisasters, charts, "Number of Disasters", true);
+        createBarChart("deaths", alphabeticalCountriesDeaths, charts, "Number of Deaths", true);
+        createBarChart("damages", alphabeticalCountriesDamages, charts, "Financial Damages($)", true);
+    } else {
+        createBarChart("disasters", topCountriesDisasters, charts, "Number of Disasters", false);
+        createBarChart("deaths", filteredCountriesDataDeaths, charts, "Number of Deaths", false);
+        createBarChart("damages", filteredCountriesDataDamages, charts, "Financial Damages($)", false);
+    }
+}
+
+// Event listeners for the buttons
+d3.select("#rankViewButton").on("click", function() {
+    updateCharts(false);
+});
+
+d3.select("#alphaViewButton").on("click", function() {
+    updateCharts(true);
+});
 
 
+// Call updateCharts initially with the default view (rank-based)
+updateCharts(false);
 
-
-
-        
 });
