@@ -1,38 +1,47 @@
 /*Overall style changes*/
 * {
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    margin-left: 0px;
-    margin-right: 0px;
+    /* font-family: Verdana, Geneva, Tahoma, sans-serif; */
+    font-family: 'Open Sans', sans-serif;
+    /* font-family: 'OPEN SANS'; */
+    margin: 0px;
+    box-sizing: border-box;
 }
 
 /*Main body*/
 body {
     background-color: cello;
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    height: 100vh; /* Set body height to fill the viewport */
+    overflow: hidden; /* Prevent scrolling */
     
 }
 
 h1 {
     /* background-color: rgba(41, 98, 60, 0.245); */
+    background-color: rgb(80, 2, 80);
     margin-top: -8px;
-    padding-bottom: -10px;
+    padding-bottom: 0px;
     padding-top: 10px;
-    font-size: 30px;
+    font-size: 28px;
     text-align: center;
+    color: white;
+
     
 }
 
 h1 span {
     font-weight: 700;
     color: hsl(234, 13%, 70%);
-    font-size: 18px;
+    font-size: 14px;
   }
 
 
 h2 {
     /* background-color: rgba(41, 98, 60, 0.245); */
-    margin-top: -8px;
-    padding-bottom: -10px;
-    padding-top: -2px;
+    margin-top: 0px;
+    padding-bottom: 0px;
+    padding-top: 0px;
     
 }
 
@@ -42,8 +51,9 @@ a {
 }
 
 table {
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    margin: 0; /* Remove default margin */
+    border-collapse: collapse; /* Collapse any borders */
 }
 
 tr {
@@ -51,29 +61,30 @@ tr {
 }
 
 #q1-container {
-    width: 50%;
-    height: 100%;
-    background-color: #f0f0f0;
+    width: 60%;
+    height: 70%;
+    /* background-color: #f0f0f0; */
     box-sizing: border-box;
     padding: 20px;
   }
   
   #q2-container {
-    width: 50%;
+    width: 30%;
     height: 50%;
-    background-color: #e0e0e0;
+    /* background-color: #e0e0e0; */
     box-sizing: border-box;
-    padding: 20px;
+    padding: 0px;
     align-self: right;
   }
   
   #q3-container {
-    width: 50%;
-    height: 50%;
-    background-color: #e0e0e0;
+    width: 30%;
+    height: 20%;
+    /* background-color: #e0e0e0; */
     box-sizing: border-box;
-    padding: 20px;
+    padding: 0px;
     align-self: right;
+    margin-bottom: 0;
   }
 
 
