@@ -16,15 +16,16 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
 
     // SVG dimensions
     var dimensions = {
-        width: 300,
-        height: 400
+        width: 400,
+        height: 230
     };
 
     // Create SVG container
-    var svg2 = d3.select("body").append("svg")
-                 .attr("width", dimensions.width)
-                 .attr("height", dimensions.height)
-                 .attr("class", "bubble-chart");
+    var svg2 = d3.select("#bubble-chart")
+             .attr("width", dimensions.width)
+             .attr("height", dimensions.height)
+             .attr("class", "bubble-chart")
+             .style("transform", "translate(10px, 0)");
 
     // Adjusted radius scale using a logarithmic scale
     var minCount = d3.min(disasterData, d => d.count);
@@ -70,6 +71,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
      node.on("mouseover", function(event, d) {
         d3.select(this).select("text")
           .style("font-size", "16px") // Enlarge font size on mouseover
+          .style("font-weight", "bold")
           .attr("dy", "0.3em");
     });
 
