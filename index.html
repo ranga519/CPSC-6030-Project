@@ -7,44 +7,42 @@
   <title>CSPC 6030 Data Visualization Project</title>
   <link rel="icon" href="something.png">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="./bar_chart.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
   <title>Project</title>
   <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
 
 <h1>
-  Natural Disasters (1970-2023)<br />
+  Natural Disasters in the Last 50 Years<br />
   <span class="bold">Where and from which disasters do people get most affected? </span>
 </h1>
 
 <table style="width:100%">
   <tr>
-    <td id="q1-container">
+    <td id="q1-container" rowspan="2">
+      <!-- Bar charts SVGs -->
       <svg id="disasters"></svg>
       <svg id="deaths"></svg>
       <svg id="damages"></svg>
-      
     </td>
     <td id="q2-container">
+      <!-- Scatter plot SVG -->
       <svg id="scatterplot"></svg>
-
     </td>
   </tr>
   <tr>
-    <td id="q3-container" >
-      <svg id="bubble"></svg>
+    <td id="q3-container">
+      <!-- Bubble chart SVG -->
+      <svg id="bubble-chart"></svg>
     </td>
   </tr>
-  <!-- <tr>
-    <td id="q3-container" >
-      <svg id="bubble"></svg>
-    </td>
-    <tr> -->
 </table>
 
+
 <!-- Team Members info -->
-<h5>
+<!-- <h5>
   Team Description.<br>
   <ul>
     <li>Ranga Baminiwatte - <a href="mailto:abamini@g.clemson.edu">@abamini@clemson.edu</a><br></li>
@@ -55,14 +53,17 @@
 <div id="tooltip-div"></div>
 
 <!-- Credits -->
-<footer>
+<!-- <footer>
   <a href="https://www.kaggle.com/datasets/brsdincer/all-natural-disasters-19002021-eosdis/" title="1970-2021_DISASTERS (Source: Kaggle)" target="_blank">1970-2021_DISASTERS (Source: Kaggle)</a><br>
-</footer>
+</footer> --> -->
 
 <!-- Scripts -->
 <!-- <script src="map.js"></script> -->
+<button id="rankViewButton">Rank View</button>
+<button id="alphaViewButton">Alphabetical View</button>
+
 <script src="scatter_plot.js"></script>
-<script src="./bar_chart.js"></script>
+<!-- <script src="./bar_chart.js"></script> -->
 <script src="bubble_chart.js"></script>
 <script src="barchart_multiple.js"></script>
 
