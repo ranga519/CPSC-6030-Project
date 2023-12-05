@@ -23,6 +23,8 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         };
     });
 
+    
+
     // Define a color scale for different disaster types
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -161,6 +163,6 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
                 return d[filter.key] !== filter.value;
         }).attr("display", "none");
     });
-}  
+};  
 });
 

@@ -1,3 +1,101 @@
+function allDisaster(disasterCount, type) {
+    const resCount = [];
+    disasterCount.forEach((count, country) => {
+      const obj = {};
+      if (!obj?.[country]) {
+        obj[country] = {};
+      }
+  
+      for (const item of count) {
+        const dis = item[type];
+        if (obj[country]?.[dis]) {
+          obj[country][dis]++;
+        } else {
+          obj[country][dis] = 1;
+        }
+      }
+      resCount.push(obj);
+    });
+  
+    return resCount;
+  }
+  
+  function getTargetType(disasterCount, targetName, type) {
+    // console.log('getTargetType....', targetName);
+    const resCount = [];
+    disasterCount.forEach((count, country) => {
+      const obj = {};
+      if (!obj?.[country]) {
+        obj[country] = {};
+      }
+  
+      for (const item of count) {
+        obj[country][type] = +obj[country][type] || 0;
+  
+        if (item[type] && item['Disaster_Type'] === targetName) {
+          obj[country][type] += +item[type];
+        }
+      }
+      resCount.push(obj);
+    });
+  
+    return resCount;
+  }
+  
+  function getTargetDisaster(disasterCount, targetName) {
+    const _allDisa = allDisaster(disasterCount, 'Disaster_Type');
+    const resCount = [];
+    for (const country of _allDisa) {
+      const countryName = Object.keys(country)[0];
+      const countryValue = Object.values(country)[0][targetName];
+      const obj = {};
+      obj[countryName] = countryValue;
+      resCount.push(obj);
+    }
+    return resCount.map((item) => {
+      return {
+        [Object.keys(item)[0]]: Object.values(item)[0] || 0,
+      };
+    });
+  }
+  
+  function getTargetDisaterType(disasterCount, targetName, type) {
+    const _allDisa = allDisaster(disasterCount, 'Disaster_Type');
+    const _typeDisa = getTargetType(disasterCount, targetName, type);
+  
+    const sufferCountry = [];
+    for (const country of _allDisa) {
+      const countryName = Object.keys(country)[0];
+      const countryValue = Object.values(country)[0][targetName];
+      if (type === `Total Damages ('000 US$)`) {
+        //   console.log('country....value', Object.values(country)[0], targetName);
+      }
+      if (countryValue) {
+        // this country suffered
+        sufferCountry.push(countryName);
+      }
+    }
+  
+    const resCount = sufferCountry.reduce((acc, countryName) => {
+      for (const country of _typeDisa) {
+        const _countryName = Object.keys(country)[0];
+        if (_countryName === countryName) {
+          const countryValue = Object.values(country)[0][type];
+          // if (type === `Total Damages ('000 US$)`) {
+          //   console.log('country222....value222222', Object.values(country)[0], type);
+          // }
+          if (countryValue) {
+            // this country suffered
+            acc.push({ [_countryName]: countryValue });
+          }
+        }
+      }
+      return acc;
+    }, []);
+  
+    return resCount;
+  }
+  
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     //svg dimensions
     var dimensions = {
@@ -445,6 +543,9 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
                 key: 'Country',
                 value: d.country
             }]);
+
+            window.filterBubbleChart(d.country);
+            console.log(d.country)
         });
 
 
@@ -519,5 +620,79 @@ d3.select("#alphaViewButton").on("click", function() {
 
 // Call updateCharts initially with the default view (rank-based)
 updateCharts(false);
+
+// Make modifications on barchart based on the clicks bubble chart
+window.onhashchange = (hash) => {
+    function mapRank(rank) {
+      const temp = rank
+        .map((item) => {
+          return {
+            country: Object.keys(item)[0],
+            count: Object.values(item)[0] || 0,
+          };
+        })
+        .sort((a, b) => b['count'] - a['count']);
+      const res = temp.map((item, inx) => {
+        return {
+          ...item,
+          rank: inx + 1,
+        };
+      });
+      const disLen = 150 - res.length;
+      if (disLen > 0) {
+        for (let i = 0, len = disLen; i < len; i++) {
+          res.push({ country: '', count: 0, rank: 0 });
+        }
+      } else {
+        res.length = 150;
+      }
+      return res;
+    }
+
+    const urlObj = new URL(hash.newURL);
+    let h = urlObj.hash.replace('#/', '').replace('-', ' ');
+
+    if (h === 'Extreme temperature') {
+      h = 'Extreme temperature ';
+    }
+    //   createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
+    let disasterRank = getTargetDisaster(disasterCount, h);
+    disasterRank = mapRank(disasterRank);
+
+    let deathRank = getTargetDisaterType(disasterCount, h, 'Total Deaths');
+    deathRank = mapRank(deathRank);
+
+    let damageRank = getTargetDisaterType(disasterCount, h, `Total Damages ('000 US$)`);
+    // console.log('disasterCount...', disasterCount);
+    damageRank = mapRank(damageRank);
+
+    yScaleDisasters = d3
+      .scaleBand()
+      .domain(disasterRank.map((d) => d.country))
+      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+      .padding(0.1);
+
+    yScaleDeaths = d3
+      .scaleBand()
+      .domain(deathRank.map((d) => d.country))
+      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+      .padding(0.1);
+
+    yScaleDamages = d3
+      .scaleBand()
+      .domain(damageRank.map((d) => d.country))
+      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+      .padding(0.1);
+
+    document.getElementById('disasters').innerHTML = '';
+    document.getElementById('deaths').innerHTML = '';
+    document.getElementById('damages').innerHTML = '';
+
+    createBarChart('disasters', disasterRank, charts, yScaleDisasters);
+    createBarChart('deaths', deathRank, charts, yScaleDeaths);
+    createBarChart('damages', damageRank, charts, yScaleDamages);
+
+    // createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
+  };
 
 });

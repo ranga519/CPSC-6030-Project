@@ -94,25 +94,67 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
 // Add interaction for bubbles
 node.on("click", function(event, d) {
     // Reset all bubbles to their original size and color
-       svg2.selectAll("circle")
-       .attr("r", function(d) { return d.r; })
-       .style("fill", function(d) { return colorScale(Math.log(d.data.count)); });
+    svg2.selectAll("circle")
+        .attr("r", function(d) { return d.r; })
+        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
+        .style("stroke", "none");  // Remove stroke from all bubbles
+
     // Enhance the clicked bubble
-        var clickedBubble = d3.select(this).select("circle");
-    // Adjust the size or color as needed
+    var clickedBubble = d3.select(this).select("circle");
+    // Adjust the size and add a thick border
     clickedBubble
         .transition()
         .duration(500)
         .attr("r", function(d) { return d.r * 1.5; })  // Increase the radius by 50%
+        .style("stroke", "black")  // Add a black stroke to the clicked bubble
+        .style("stroke-width", 3); // Set the stroke width
 
-    
+    // Decrease opacity of other bubbles
+    svg2.selectAll("circle")
+        .filter(function(other) { return other !== d; }) // Exclude the clicked bubble
+        .transition()
+        .duration(500)
+        .style("opacity", 0.5);  // Adjust opacity as needed
+
     // Filter the scatter plot dots based on the selected country
     window.updateScatterPlot([{
         key: 'Disaster_Type',
         value: d.data.name
-
     }]);
+
+    const t = d3.select(this).select('text');
+    const text  = t.text().trim();
+    window.location.hash = `/${text.replace(' ', '-')}`
 });
+
+// Add an event listener to the document to reset styles when clicked elsewhere
+d3.select(document).on("click", function() {
+    // Reset styles for all bubbles in the bubble chart
+    svg2.selectAll("circle")
+        .attr("r", function(d) { return d.r; })
+        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
+        .style("stroke", "none")  // Remove stroke from all bubbles
+        .style("opacity", 1);  // Reset opacity
+
+    // Reset styles for all bubbles in the scatterplot
+    window.resetScatterPlot();  
+
+    // Remove the event listener to avoid unwanted resets
+    d3.select(document).on("click", null);
+
+});
+
+window.filterBubbleChart = function(filters) {
+    // Reset the visibility of all dots
+        dots.attr("display", null);
+
+    // Apply the specified filters
+     filters.forEach(function(filter) {
+            dots.filter(function(d) {
+                return d[filter.key] !== filter.value;
+        }).attr("display", "none");
+    });
+}; 
 
 
 });
