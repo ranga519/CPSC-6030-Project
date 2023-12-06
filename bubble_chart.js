@@ -165,11 +165,7 @@ d3.select(document).on("click", function() {
 
 window.filterBubbleChart = function(filters) {
     // Reset styles for all bubbles in the bubble chart
-    svg2.selectAll("circle")
-        .attr("r", function(d) { return d.r; })
-        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
-        .style("stroke", "none")  // Remove stroke from all bubbles
-        .style("opacity", 1);  // Reset opacity
+    window.resetBubbleChart();
 
     //fix from here
 
