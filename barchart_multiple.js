@@ -95,7 +95,7 @@ function allDisaster(disasterCount, type) {
   
     return resCount;
   }
-  
+
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
     //svg dimensions
     var dimensions = {
@@ -544,8 +544,12 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
                 value: d.country
             }]);
 
-            window.filterBubbleChart(d.country);
-            console.log(d.country)
+            window.filterBubbleChart([{
+                key: 'Country',
+                value: d.country
+            }]);
+
+            console.log(filterBubbleChart)
         });
 
 
@@ -622,7 +626,7 @@ d3.select("#alphaViewButton").on("click", function() {
 updateCharts(false);
 
 // Make modifications on barchart based on the clicks bubble chart
-window.onhashchange = (hash) => {
+window.updateBarChart = (hash) => {
     function mapRank(rank) {
       const temp = rank
         .map((item) => {
@@ -646,12 +650,12 @@ window.onhashchange = (hash) => {
       } else {
         res.length = 150;
       }
-      return res;
+      return res.filter((item) => item.count > 0);
     }
 
-    const urlObj = new URL(hash.newURL);
-    let h = urlObj.hash.replace('#/', '').replace('-', ' ');
-
+    // const urlObj = new URL(hash.newURL);
+    // let h = urlObj.hash.replace('#/', '').replace('-', ' ');
+    let h = hash;
     if (h === 'Extreme temperature') {
       h = 'Extreme temperature ';
     }
@@ -684,13 +688,25 @@ window.onhashchange = (hash) => {
       .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
       .padding(0.1);
 
-    document.getElementById('disasters').innerHTML = '';
-    document.getElementById('deaths').innerHTML = '';
-    document.getElementById('damages').innerHTML = '';
+    const disasterWrap = document.getElementById('disasters');
+    const deathsWrap = document.getElementById('deaths');
+    const damagesWrap = document.getElementById('damages');
+
+    disasterWrap.removeChild(document.querySelector('#disasters>g'))
+    deathsWrap.removeChild(document.querySelector('#deaths>g'))
+    damagesWrap.removeChild(document.querySelector('#damages>g'))
 
     createBarChart('disasters', disasterRank, charts, yScaleDisasters);
     createBarChart('deaths', deathRank, charts, yScaleDeaths);
     createBarChart('damages', damageRank, charts, yScaleDamages);
+
+    window.resetCharts = function() {
+    clearCharts(); // Clear existing charts
+    // Recreate the charts with the initial data
+    createBarChart("disasters", topCountriesDisasters, charts, "Number of Disasters", false);
+    createBarChart("deaths", filteredCountriesDataDeaths, charts, "Number of Deaths", false);
+    createBarChart("damages", filteredCountriesDataDamages, charts, "Financial Damages($)", false);
+    }
 
     // createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
   };

@@ -125,7 +125,26 @@ node.on("click", function(event, d) {
     const t = d3.select(this).select('text');
     const text  = t.text().trim();
     window.location.hash = `/${text.replace(' ', '-')}`
+    window.updateBarChart(text)
 });
+
+// Define a function to reset the bubble chart
+window.resetBubbleChart = function() {
+    // Reset styles for all bubbles in the bubble chart
+    svg2.selectAll("circle")
+        .attr("r", function(d) { return d.r; })
+        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
+        .style("stroke", "none")  // Remove stroke from all bubbles
+        .style("opacity", 1);  // Reset opacity
+
+    // Reset styles for all labels
+    svg2.selectAll("text")
+        .style("font-size", "7px")
+        .attr("dy", "0.3em");
+
+    // Remove the event listener to avoid unwanted resets
+    d3.select(document).on("click", null);
+};
 
 // Add an event listener to the document to reset styles when clicked elsewhere
 d3.select(document).on("click", function() {
@@ -137,7 +156,7 @@ d3.select(document).on("click", function() {
         .style("opacity", 1);  // Reset opacity
 
     // Reset styles for all bubbles in the scatterplot
-    window.resetScatterPlot();  
+    // window.resetScatterPlot();  
 
     // Remove the event listener to avoid unwanted resets
     d3.select(document).on("click", null);
@@ -145,16 +164,60 @@ d3.select(document).on("click", function() {
 });
 
 window.filterBubbleChart = function(filters) {
-    // Reset the visibility of all dots
-        dots.attr("display", null);
+    // Reset styles for all bubbles in the bubble chart
+    svg2.selectAll("circle")
+        .attr("r", function(d) { return d.r; })
+        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
+        .style("stroke", "none")  // Remove stroke from all bubbles
+        .style("opacity", 1);  // Reset opacity
 
-    // Apply the specified filters
-     filters.forEach(function(filter) {
-            dots.filter(function(d) {
-                return d[filter.key] !== filter.value;
-        }).attr("display", "none");
-    });
-}; 
+    //fix from here
 
+
+    // Check if filters contain the 'country' key
+    // if (filters.value in filters) 
+        var selectedCountry = filters.value;
+        console.log(selectedCountry)
+
+        // Filter data based on the selected country
+        var filteredData = dataset.filter(function(data) {
+            return data['Country'] !== selectedCountry;
+        });
+
+        // Count occurrences of each disaster type in the filtered data
+        var filteredDisasterFrequency = {};
+        filteredData.forEach(function(d) {
+            if (filteredDisasterFrequency[d['Disaster_Type']]) {
+                filteredDisasterFrequency[d['Disaster_Type']]++;
+            } else {
+                filteredDisasterFrequency[d['Disaster_Type']] = 1;
+            }
+        });
+
+        var filteredDisasterData = Object.keys(filteredDisasterFrequency).map(function(key) {
+            return { name: key, count: filteredDisasterFrequency[key] };
+        });
+
+        // Update the root node with the filtered data
+        root = d3.hierarchy({children: filteredDisasterData})
+                 .sum(function(d) { return radiusScale(d.count); });
+
+        // Update the bubbles with the new data
+        svg2.selectAll(".node")
+            .data(pack(root).leaves())
+            .select("circle")
+            .transition()
+            .duration(500)
+            .attr("r", function(d) { return d.r; })
+            .style("fill", function(d) { return colorScale(Math.log(d.data.count)); });
+
+        // Update the labels with the new data
+        svg2.selectAll(".node")
+            .data(pack(root).leaves())
+            .select("text")
+            .text(function(d) { return d.data.name; });
+    
+
+};
 
 });

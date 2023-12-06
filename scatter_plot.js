@@ -151,6 +151,9 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         .on("click", function () {
             // Reset the visibility of all dots
             dots.attr("display", null);
+        window.resetCharts()
+        window.resetBubbleChart()
+
         });
 
     window.updateScatterPlot = function(filters) {
@@ -162,6 +165,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
             dots.filter(function(d) {
                 return d[filter.key] !== filter.value;
         }).attr("display", "none");
+        console.log("Hello " + filters.key+ "!")
     });
 };  
 });
