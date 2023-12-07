@@ -543,12 +543,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
               value: d.country
           }]);
 
-          window.filterBubbleChart([{
-              key: 'Country',
-              value: d.country
-          }]);
-
-          console.log(filterBubbleChart)
+          window.filterBubbleChart(d.country);
       });
 
 
@@ -625,89 +620,94 @@ d3.select("#alphaViewButton").on("click", function() {
 updateCharts(false);
 
 // Make modifications on barchart based on the clicks bubble chart
-window.updateBarChart = (hash) => {
-  function mapRank(rank) {
-    const temp = rank
-      .map((item) => {
-        return {
-          country: Object.keys(item)[0],
-          count: Object.values(item)[0] || 0,
-        };
-      })
-      .sort((a, b) => b['count'] - a['count']);
-    const res = temp.map((item, inx) => {
-      return {
-        ...item,
-        rank: inx + 1,
-      };
-    });
-    const disLen = 150 - res.length;
-    if (disLen > 0) {
-      for (let i = 0, len = disLen; i < len; i++) {
-        res.push({ country: '', count: 0, rank: 0 });
+window.updateBarChart = (hash,isAlphabetical) => {
+    function mapRank(rank,isAlphabetical) {
+      const temp = rank
+        .map((item) => {
+          return {
+            country: Object.keys(item)[0],
+            count: Object.values(item)[0] || 0,
+          };
+        })
+        //it seems the isAlphabetical is always False, need more work here
+      if (!isAlphabetical) {
+          temp.sort((a, b) => b['count'] - a['count']);
       }
-    } else {
-      res.length = 150;
+      const res = temp.map((item, inx) => {
+        return {
+          ...item,
+        };
+      });
+      const disLen = 150 - res.length;
+      if (disLen > 0) {
+        for (let i = 0, len = disLen; i < len; i++) {
+          res.push({ country: '', count: 0, rank: 0 });
+        }
+      } else {
+        res.length = 150;
+      }
+      return res.filter((item) => item.count > 1);
     }
-    return res.filter((item) => item.count > 0);
-  }
 
-  // const urlObj = new URL(hash.newURL);
-  // let h = urlObj.hash.replace('#/', '').replace('-', ' ');
-  let h = hash;
-  if (h === 'Extreme temperature') {
-    h = 'Extreme temperature ';
-  }
-  //   createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
-  let disasterRank = getTargetDisaster(disasterCount, h);
-  disasterRank = mapRank(disasterRank);
+    // const urlObj = new URL(hash.newURL);
+    // let h = urlObj.hash.replace('#/', '').replace('-', ' ');
+    let h = hash;
+    if (h === 'Extreme temperature') {
+      h = 'Extreme temperature ';
+    }
+    //   createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
+    let disasterRank = getTargetDisaster(disasterCount, h);
+    disasterRank = mapRank(disasterRank,isAlphabetical);
+    calculateRanks(disasterRank, 'disasters');
 
-  let deathRank = getTargetDisaterType(disasterCount, h, 'Total Deaths');
-  deathRank = mapRank(deathRank);
+    let deathRank = getTargetDisaterType(disasterCount, h, 'Total Deaths');
+    deathRank = mapRank(deathRank,isAlphabetical);
+    calculateRanks(deathRank, 'deaths');
 
-  let damageRank = getTargetDisaterType(disasterCount, h, `Total Damages ('000 US$)`);
-  // console.log('disasterCount...', disasterCount);
-  damageRank = mapRank(damageRank);
+    let damageRank = getTargetDisaterType(disasterCount, h, `Total Damages ('000 US$)`);
+    // console.log('disasterCount...', disasterCount);
+    damageRank = mapRank(damageRank,isAlphabetical);
+    calculateRanks(damageRank, 'damages');
 
-  yScaleDisasters = d3
-    .scaleBand()
-    .domain(disasterRank.map((d) => d.country))
-    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
-    .padding(0.1);
+    yScaleDisasters = d3
+      .scaleBand()
+      .domain(disasterRank.map((d) => d.country))
+      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+      .padding(0.1);
 
-  yScaleDeaths = d3
-    .scaleBand()
-    .domain(deathRank.map((d) => d.country))
-    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
-    .padding(0.1);
+    yScaleDeaths = d3
+      .scaleBand()
+      .domain(deathRank.map((d) => d.country))
+      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+      .padding(0.1);
 
-  yScaleDamages = d3
-    .scaleBand()
-    .domain(damageRank.map((d) => d.country))
-    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
-    .padding(0.1);
+    yScaleDamages = d3
+      .scaleBand()
+      .domain(damageRank.map((d) => d.country))
+      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+      .padding(0.1);
 
-  const disasterWrap = document.getElementById('disasters');
-  const deathsWrap = document.getElementById('deaths');
-  const damagesWrap = document.getElementById('damages');
+    const disasterWrap = document.getElementById('disasters');
+    const deathsWrap = document.getElementById('deaths');
+    const damagesWrap = document.getElementById('damages');
 
-  disasterWrap.removeChild(document.querySelector('#disasters>g'))
-  deathsWrap.removeChild(document.querySelector('#deaths>g'))
-  damagesWrap.removeChild(document.querySelector('#damages>g'))
+    disasterWrap.removeChild(document.querySelector('#disasters>g'))
+    deathsWrap.removeChild(document.querySelector('#deaths>g'))
+    damagesWrap.removeChild(document.querySelector('#damages>g'))
 
-  createBarChart('disasters', disasterRank, charts, yScaleDisasters);
-  createBarChart('deaths', deathRank, charts, yScaleDeaths);
-  createBarChart('damages', damageRank, charts, yScaleDamages);
-  
-  window.resetCharts = function() {
-  clearCharts(); // Clear existing charts
-  // Recreate the charts with the initial data
-  createBarChart("disasters", topCountriesDisasters, charts, "Number of Disasters", false);
-  createBarChart("deaths", filteredCountriesDataDeaths, charts, "Number of Deaths", false);
-  createBarChart("damages", filteredCountriesDataDamages, charts, "Financial Damages($)", false);
-  }
+    createBarChart('disasters', disasterRank, charts, yScaleDisasters,isAlphabetical);
+    createBarChart('deaths', deathRank, charts, yScaleDeaths,isAlphabetical);
+    createBarChart('damages', damageRank, charts, yScaleDamages,isAlphabetical);
 
-  // createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
-};
+    window.resetCharts = function() {
+    clearCharts(); // Clear existing charts
+    // Recreate the charts with the initial data
+    createBarChart("disasters", topCountriesDisasters, charts, "Number of Disasters", false);
+    createBarChart("deaths", filteredCountriesDataDeaths, charts, "Number of Deaths", false);
+    createBarChart("damages", filteredCountriesDataDamages, charts, "Financial Damages($)", false);
+    }
+
+    // createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
+  };
 
 });

@@ -1,8 +1,8 @@
-
-d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
+// Function to initialize the bubble chart
+function initializeBubbleChart(data) {
     // Count occurrences of each disaster type
     var disasterFrequency = {};
-    dataset.forEach(function(d) {
+    data.forEach(function (d) {
         if (disasterFrequency[d['Disaster_Type']]) {
             disasterFrequency[d['Disaster_Type']]++;
         } else {
@@ -10,193 +10,226 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         }
     });
 
-    var disasterData = Object.keys(disasterFrequency).map(function(key) {
+    var disasterData = Object.keys(disasterFrequency).map(function (key) {
         return { name: key, count: disasterFrequency[key] };
     });
 
     // SVG dimensions
     var dimensions = {
         width: 400,
-        height: 230
+        height: 300
     };
 
     // Create SVG container
     var svg2 = d3.select("#bubble-chart")
-             .attr("width", dimensions.width)
-             .attr("height", dimensions.height)
-             .attr("class", "bubble-chart")
-             .style("transform", "translate(10px, 0)");
+        .attr("width", dimensions.width)
+        .attr("height", dimensions.height)
+        .attr("class", "bubble-chart")
+        .style("transform", "translate(10px, 0)");
+
+    // Append title to the SVG container
+    svg2.append("text")
+        .attr("x", dimensions.width / 2)
+        .attr("y", dimensions.height - 2) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .text("Types of Disasters");
 
     // Adjusted radius scale using a logarithmic scale
     var minCount = d3.min(disasterData, d => d.count);
     var maxCount = d3.max(disasterData, d => d.count);
-    var radiusScale = d3.scaleSqrt()  // You can also try d3.scaleLog()
-                        .domain([minCount, maxCount])
-                        .range([5, 100]);  // Adjust the range based on desired bubble sizes
+    var radiusScale = d3.scaleSqrt()
+        .domain([minCount, maxCount])
+        .range([5, 100]);
 
     // Pack layout setup
     var pack = d3.pack()
-                 .size([dimensions.width, dimensions.height])
-                 .padding(5);
+        .size([dimensions.width, dimensions.height])
+        .padding(5);
 
     // Root node for pack layout
-    var root = d3.hierarchy({children: disasterData})
-                 .sum(function(d) { return radiusScale(d.count); }); // Size of each bubble
+    var root = d3.hierarchy({ children: disasterData })
+        .sum(function (d) { return radiusScale(d.count); });
 
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10)
-                 .domain(disasterData.map(function(d) { return d.name; }));
+        .domain(disasterData.map(function (d) { return d.name; }));
+
+    // Store the initial colors
+    var initialColors = {};
+    disasterData.forEach(function (d) {
+        initialColors[d.name] = colorScale(Math.log(d.count));
+    });
 
     // Build the bubbles
     var node = svg2.selectAll(".node")
-                   .data(pack(root).leaves())
-                   .enter().append("g")
-                   .attr("class", "node")
-                   .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        .data(pack(root).leaves())
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
     // Draw the bubbles
     node.append("circle")
-        .attr("id", function(d) { return d.data.name; })
-        .attr("r", function(d) { return d.r; })
-        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); });
+        .attr("id", function (d) { return d.data.name; })
+        .attr("r", function (d) { return d.r; })
+        .style("fill", function (d) { return initialColors[d.data.name]; })
+        .on("mouseover", function (event, d) {
+            // Show tooltip on mouseover
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(d.data.name + "<br/>Count: " + d.data.count)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (d) {
+            // Hide tooltip on mouseout
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 
     // Add labels to the bubbles
     node.append("text")
         .attr("dy", ".3em")
         .style("text-anchor", "middle")
         .style("fill", "black")
-        .text(function(d) { return d.data.name})
-        .style("font-size", "7px"); // Adjust text to fit in bubble
+        .text(function (d) { return d.data.name; })
+        .style("font-size", "7px");
 
-     // Add interaction for labels
-     node.on("mouseover", function(event, d) {
+    // Add interaction for labels
+    node.on("mouseover", function (event, d) {
         d3.select(this).select("text")
-          .style("font-size", "16px") // Enlarge font size on mouseover
-          .style("font-weight", "bold")
-          .attr("dy", "0.3em");
+            .style("font-size", "16px")
+            .style("font-weight", "bold")
+            .attr("dy", "0.3em");
     });
 
-    node.on("mouseout", function(d) {
+    node.on("mouseout", function (d) {
         d3.select(this).select("text")
-          .style("font-size", "8px") // Reset font size on mouseout
-          .attr("dy", "0.3em");
+            .style("font-size", "8px")
+            .attr("dy", "0.3em");
     });
 
-// // Add interaction for bubbles
-// node.on("click", function(event, d) {
-//     // Filter data based on the selected natural disaster type
-//     var filteredData = dataset.filter(function(data) {
-//         return data['Disaster_Type'] === d.data.name;
-//     });
+    // Add interaction for bubbles
+    node.on("click", function (event, d) {
+        // Reset all bubbles to their original size and color
+        svg2.selectAll("circle")
+            .attr("r", function (d) { return d.r; })
+            .style("fill", function (d) { return initialColors[d.data.name]; })
+            .style("stroke", "none");
 
-//     // Update the scatter plot with the filtered data
-//     updateScatterPlot(filteredData);
-// });
-// Add interaction for bubbles
-node.on("click", function(event, d) {
-    // Reset all bubbles to their original size and color
-    svg2.selectAll("circle")
-        .attr("r", function(d) { return d.r; })
-        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
-        .style("stroke", "none");  // Remove stroke from all bubbles
+        // Enhance the clicked bubble
+        var clickedBubble = d3.select(this).select("circle");
+        // Adjust the size and add a thick border
+        clickedBubble
+            .transition()
+            .duration(500)
+            .attr("r", function (d) { return d.r * 1.5; })
+            .style("stroke", "black")
+            .style("stroke-width", 3)
+            .style("opacity", 3.5);
 
-    // Enhance the clicked bubble
-    var clickedBubble = d3.select(this).select("circle");
-    // Adjust the size and add a thick border
-    clickedBubble
-        .transition()
-        .duration(500)
-        .attr("r", function(d) { return d.r * 1.5; })  // Increase the radius by 50%
-        .style("stroke", "black")  // Add a black stroke to the clicked bubble
-        .style("stroke-width", 3); // Set the stroke width
+        // Decrease opacity of other bubbles
+        svg2.selectAll("circle")
+            .filter(function (other) { return other !== d; })
+            .transition()
+            .duration(500)
+            .style("opacity", 0.5);
 
-    // Decrease opacity of other bubbles
-    svg2.selectAll("circle")
-        .filter(function(other) { return other !== d; }) // Exclude the clicked bubble
-        .transition()
-        .duration(500)
-        .style("opacity", 0.5);  // Adjust opacity as needed
+        // Filter the scatter plot dots based on the selected country
+        window.updateScatterPlot([{
+            key: 'Disaster_Type',
+            value: d.data.name
+        }]);
 
-    // Filter the scatter plot dots based on the selected country
-    window.updateScatterPlot([{
-        key: 'Disaster_Type',
-        value: d.data.name
-    }]);
+        const t = d3.select(this).select('text');
+        const text = t.text().trim();
+        window.location.hash = `/${text.replace(' ', '-')}`
+        window.updateBarChart(text);
+    });
 
-    const t = d3.select(this).select('text');
-    const text  = t.text().trim();
-    window.location.hash = `/${text.replace(' ', '-')}`
-    window.updateBarChart(text)
-});
+    // Tooltip element
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
-// Define a function to reset the bubble chart
-window.resetBubbleChart = function() {
-    // Reset styles for all bubbles in the bubble chart
-    svg2.selectAll("circle")
-        .attr("r", function(d) { return d.r; })
-        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
-        .style("stroke", "none")  // Remove stroke from all bubbles
-        .style("opacity", 1);  // Reset opacity
-
-    // Reset styles for all labels
-    svg2.selectAll("text")
-        .style("font-size", "7px")
-        .attr("dy", "0.3em");
-
-    // Remove the event listener to avoid unwanted resets
-    d3.select(document).on("click", null);
-};
-
-// Add an event listener to the document to reset styles when clicked elsewhere
-d3.select(document).on("click", function() {
-    // Reset styles for all bubbles in the bubble chart
-    svg2.selectAll("circle")
-        .attr("r", function(d) { return d.r; })
-        .style("fill", function(d) { return colorScale(Math.log(d.data.count)); })
-        .style("stroke", "none")  // Remove stroke from all bubbles
-        .style("opacity", 1);  // Reset opacity
-
-    // Reset styles for all bubbles in the scatterplot
-    // window.resetScatterPlot();  
-
-    // Remove the event listener to avoid unwanted resets
-    d3.select(document).on("click", null);
-
-});
-
-window.filterBubbleChart = function(filters) {
-    // Reset styles for all bubbles in the bubble chart
-    window.resetBubbleChart();
-
-    //fix from here
+    // Define a function to reset the bubble chart
+    window.resetBubbleChart = function () {
+         svg2.select("text").remove();
+ 
+        // Remove all existing nodes
+        svg2.selectAll(".node").remove();
 
 
-    // Check if filters contain the 'country' key
-    // if (filters.value in filters) 
-        var selectedCountry = filters.value;
-        console.log(selectedCountry)
+        // Rebuild the bubble chart using the original data
+        initializeBubbleChart(data);
+        
+    };
+
+    // Add an event listener to the document to reset styles when clicked elsewhere
+    d3.select(document).on("click", function () {
+        // Reset styles for all bubbles in the bubble chart
+        svg2.selectAll("circle")
+            .attr("r", function (d) { return d.r; })
+            .style("fill", function (d) { return initialColors[d.data.name]; })
+            .style("stroke", "none")
+            .style("opacity", 1);
+
+        // Remove the event listener to avoid unwanted resets
+        d3.select(document).on("click", null);
+    });
+
+    window.filterBubbleChart = function (filters) {
+        // Reset styles for all bubbles in the bubble chart
+        window.resetBubbleChart();
+        // Check if filters contain the 'Country' key
+        console.log(filters)
+        var selectedCountry = filters;
+        console.log(selectedCountry);
 
         // Filter data based on the selected country
-        var filteredData = dataset.filter(function(data) {
-            return data['Country'] !== selectedCountry;
+        var filteredData = data.filter(function (data) {
+            return data['Country'] === selectedCountry;
+        });
+
+        // Replace NaN values with zeros
+        filteredData.forEach(function (d) {
+            if (isNaN(d['count'])) {
+                d['count'] = 0;
+            }
         });
 
         // Count occurrences of each disaster type in the filtered data
         var filteredDisasterFrequency = {};
-        filteredData.forEach(function(d) {
+        filteredData.forEach(function (d) {
             if (filteredDisasterFrequency[d['Disaster_Type']]) {
                 filteredDisasterFrequency[d['Disaster_Type']]++;
             } else {
                 filteredDisasterFrequency[d['Disaster_Type']] = 1;
             }
         });
+        console.log(filteredDisasterFrequency)
 
-        var filteredDisasterData = Object.keys(filteredDisasterFrequency).map(function(key) {
+        var filteredDisasterData = Object.keys(filteredDisasterFrequency).map(function (key) {
             return { name: key, count: filteredDisasterFrequency[key] };
         });
 
+        // Adjusted radius scale using a logarithmic scale
+        var filteredminCount = d3.min(filteredDisasterData, d => d.count);
+        var filteredmaxCount = d3.max(filteredDisasterData, d => d.count);
+        var filteredradiusScale = d3.scaleSqrt()
+                                    .domain([filteredminCount, filteredmaxCount])
+                                    .range([5, 100]);
+
         // Update the root node with the filtered data
-        root = d3.hierarchy({children: filteredDisasterData})
-                 .sum(function(d) { return radiusScale(d.count); });
+        root = d3.hierarchy({ children: filteredDisasterData })
+            .sum(function (d) { return filteredradiusScale(d.count); });
+        
+        svg2.select("text").remove();
+            // Change the title of the bubble chart
+        svg2.append("text")
+            .text("Types of Disasters in " + selectedCountry);
 
         // Update the bubbles with the new data
         svg2.selectAll(".node")
@@ -204,16 +237,21 @@ window.filterBubbleChart = function(filters) {
             .select("circle")
             .transition()
             .duration(500)
-            .attr("r", function(d) { return d.r; })
-            .style("fill", function(d) { return colorScale(Math.log(d.data.count)); });
+            .attr("r", function (d) { return d.r; })
+            .style("fill", function (d) { return initialColors[d.data.name]; });
 
         // Update the labels with the new data
         svg2.selectAll(".node")
             .data(pack(root).leaves())
             .select("text")
-            .text(function(d) { return d.data.name; });
-    
+            .text(function (d) { return d.data.name; });
+            
 
-};
+        
+    };
+}
 
+// Load data and initialize the bubble chart
+d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function (dataset) {
+    initializeBubbleChart(dataset);
 });
