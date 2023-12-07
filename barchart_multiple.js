@@ -99,7 +99,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
   //svg dimensions
   var dimensions = {
       width: 260,
-      height: 590,
+      height: 630,
       margin: {
           top: 15,
           bottom: 10,

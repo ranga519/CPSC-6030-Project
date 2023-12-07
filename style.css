@@ -13,7 +13,7 @@ body {
     margin: 0; /* Remove default margin */
     padding: 0; /* Remove default padding */
     height: 100vh; /* Set body height to fill the viewport */
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden; 
     
 }
 
@@ -62,10 +62,10 @@ tr {
 
 #q1-container {
     width: 60%;
-    height: 70%;
+    height: 60%;
     /* background-color: #f0f0f0; */
     box-sizing: border-box;
-    padding: 20px;
+    padding: 0px;
   }
   
   #q2-container {
@@ -85,6 +85,8 @@ tr {
     padding: 0px;
     align-self: right;
     margin-bottom: 0;
+    
+
   }
 
 

@@ -17,7 +17,7 @@ function initializeBubbleChart(data) {
     // SVG dimensions
     var dimensions = {
         width: 400,
-        height: 300
+        height: 250
     };
 
     // Create SVG container
@@ -25,7 +25,7 @@ function initializeBubbleChart(data) {
         .attr("width", dimensions.width)
         .attr("height", dimensions.height)
         .attr("class", "bubble-chart")
-        .style("transform", "translate(10px, 0)");
+        .style("transform", "translate(50px, 0)");
 
     // Append title to the SVG container
     svg2.append("text")
