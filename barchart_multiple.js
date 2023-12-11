@@ -60,46 +60,37 @@ function getTargetDisaster(disasterCount, targetName) {
 }
 
 function getTargetDisaterType(disasterCount, targetName, type) {
-  const _allDisa = allDisaster(disasterCount, 'Disaster_Type');
-  const _typeDisa = getTargetType(disasterCount, targetName, type);
+  // Initialize an object to store the result
+  const output = {};
 
-  const sufferCountry = [];
-  for (const country of _allDisa) {
-    const countryName = Object.keys(country)[0];
-    const countryValue = Object.values(country)[0][targetName];
-    if (type === `Total Damages ('000 US$)`) {
-      //   console.log('country....value', Object.values(country)[0], targetName);
-    }
-    if (countryValue) {
-      // this country suffered
-      sufferCountry.push(countryName);
-    }
-  }
+  // Iterate over each country's disaster data
+  disasterCount.forEach((count, country) => {
+      // Set a default value of 0 for each country
+      output[country] = 0;
 
-  const resCount = sufferCountry.reduce((acc, countryName) => {
-    for (const country of _typeDisa) {
-      const _countryName = Object.keys(country)[0];
-      if (_countryName === countryName) {
-        const countryValue = Object.values(country)[0][type];
-        // if (type === `Total Damages ('000 US$)`) {
-        //   console.log('country222....value222222', Object.values(country)[0], type);
-        // }
-        if (countryValue) {
-          // this country suffered
-          acc.push({ [_countryName]: countryValue });
-        }
+      // Filter out the disaster data that matches the targetName
+      const targetDisasters = count.filter(d => d['Disaster_Type'] === targetName);
+
+      // If we have disasters that match the targetName, sum up the values of 'type'
+      if(targetDisasters.length > 0) {
+          // Calculate the sum of the 'type' value ('Total Damages' or 'Total Deaths') for the targeted disasters
+          const sumOfType = d3.sum(targetDisasters, d => +d[type]);
+
+          // Add this value to the relevant country in the output object
+          output[country] = sumOfType;
       }
-    }
-    return acc;
-  }, []);
+  });
 
-  return resCount;
+  // Convert the output object into an array of objects as per the original function's output format
+  return Object.keys(output).map(key => ({ [key]: output[key] }));
 }
+
+
 d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
   //svg dimensions
   var dimensions = {
       width: 260,
-      height: 630,
+      height: 590,
       margin: {
           top: 15,
           bottom: 10,
@@ -429,7 +420,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
       var barsGroup = svg.append("g")
           .attr("transform", "translate(" + dimensions.margin.left + "," + dimensions.margin.top + ")");
       
-      // number of disasterstitle
+      // Add title
       svg.append("text")
           .attr("x", dimensions.margin.left) // Position the title
           .attr("y", 12) // A little below the top edge of the SVG
@@ -442,7 +433,7 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
 
       var xScale = d3.scaleLog()
           .domain([1, d3.max(data, function(d) { return d.count; })])
-          .range([1, dimensions.width - dimensions.margin.left - dimensions.margin.right]);
+          .range([0, dimensions.width - dimensions.margin.left - dimensions.margin.right]);
 
       var yScale = d3.scaleBand()
           .domain(sortedData.map(d => d.country))
@@ -536,16 +527,15 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
                   .style("opacity", 1);
       });
       }) 
-      .on("click", function(event, d) {
-          // Filter the scatter plot dots based on the selected country
-          window.updateScatterPlot([{
-              key: 'Country',
-              value: d.country
-          }]);
+    .on("click", function(event, d) {
+        // Filter the scatter plot dots based on the selected country
+        window.updateScatterPlot([{
+            key: 'Country',
+            value: d.country
+        }]);
 
-          window.filterBubbleChart(d.country);
-      });
-
+        window.filterBubbleChart(d.country);
+    });
 
 
   // Add Y-axis labels
@@ -594,7 +584,6 @@ function clearCharts() {
 function updateCharts(isAlphabetical) {
 
   clearCharts();
-
   if (isAlphabetical) {
       createBarChart("disasters", alphabeticalCountriesDisasters, charts, "Number of Disasters", true);
       createBarChart("deaths", alphabeticalCountriesDeaths, charts, "Number of Deaths", true);
@@ -621,93 +610,105 @@ updateCharts(false);
 
 // Make modifications on barchart based on the clicks bubble chart
 window.updateBarChart = (hash,isAlphabetical) => {
-    function mapRank(rank,isAlphabetical) {
-      const temp = rank
-        .map((item) => {
-          return {
-            country: Object.keys(item)[0],
-            count: Object.values(item)[0] || 0,
-          };
-        })
-        //it seems the isAlphabetical is always False, need more work here
-      if (!isAlphabetical) {
-          temp.sort((a, b) => b['count'] - a['count']);
-      }
-      const res = temp.map((item, inx) => {
+  function mapRank(rank,isAlphabetical) {
+    const temp = rank
+      .map((item) => {
         return {
-          ...item,
+          country: Object.keys(item)[0],
+          count: Object.values(item)[0] || 0,
         };
-      });
-      const disLen = 150 - res.length;
-      if (disLen > 0) {
-        for (let i = 0, len = disLen; i < len; i++) {
-          res.push({ country: '', count: 0, rank: 0 });
-        }
-      } else {
-        res.length = 150;
+      })
+      //it seems the isAlphabetical is always False, need more work here
+    if (!isAlphabetical) {
+        temp.sort((a, b) => b['count'] - a['count']);
+    }
+    const res = temp.map((item, inx) => {
+      const { count, country } = item;
+      return {
+        count,
+        country
+      };
+    });
+    const disLen = 100 - res.length;
+    if (disLen > 0) {
+      for (let i = 0, len = disLen; i < len; i++) {
+       // res.push({ country: '', count: 0 });
       }
-      return res.filter((item) => item.count > 1);
+    } else {
+      res.length = 100;
     }
+    //return res.filter((item) => item.count > 0);
+    return res;
+  }
+  // const urlObj = new URL(hash.newURL);
+  // let h = urlObj.hash.replace('#/', '').replace('-', ' ');
+  let h = hash;
+  if (h === 'Extreme temperature') {
+    h = 'Extreme temperature ';
+  }
+  //   createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
+  let disasterRank = getTargetDisaster(disasterCount, h);
+  disasterRank = mapRank(disasterRank,isAlphabetical);
+  disasterRank = disasterRank.filter(item => item.count > 0);
+  var countryListFilter = [];
+  for(var i = 0; i < disasterRank.length; i++) {
+    countryListFilter.push(disasterRank[i].country);
+  }
+  var filteredDisasterCount = new Map();
+  for (let country of countryListFilter) {
+      if (disasterCount.has(country)) {
+        filteredDisasterCount.set(country, disasterCount.get(country));
+      }
+  }
+  calculateRanks(disasterRank, 'disasters');
 
-    // const urlObj = new URL(hash.newURL);
-    // let h = urlObj.hash.replace('#/', '').replace('-', ' ');
-    let h = hash;
-    if (h === 'Extreme temperature') {
-      h = 'Extreme temperature ';
-    }
-    //   createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
-    let disasterRank = getTargetDisaster(disasterCount, h);
-    disasterRank = mapRank(disasterRank,isAlphabetical);
-    calculateRanks(disasterRank, 'disasters');
+  let deathRank = getTargetDisaterType(filteredDisasterCount, h, 'Total Deaths');
+  deathRank = mapRank(deathRank,isAlphabetical);
+  calculateRanks(deathRank, 'deaths');
 
-    let deathRank = getTargetDisaterType(disasterCount, h, 'Total Deaths');
-    deathRank = mapRank(deathRank,isAlphabetical);
-    calculateRanks(deathRank, 'deaths');
+  let damageRank = getTargetDisaterType(filteredDisasterCount, h, `Total Damages ('000 US$)`);
+  damageRank = mapRank(damageRank,isAlphabetical);
+  calculateRanks(damageRank, 'damages');
 
-    let damageRank = getTargetDisaterType(disasterCount, h, `Total Damages ('000 US$)`);
-    // console.log('disasterCount...', disasterCount);
-    damageRank = mapRank(damageRank,isAlphabetical);
-    calculateRanks(damageRank, 'damages');
+  yScaleDisasters = d3
+    .scaleBand()
+    .domain(disasterRank.map((d) => d.country))
+    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+    .padding(0.1);
 
-    yScaleDisasters = d3
-      .scaleBand()
-      .domain(disasterRank.map((d) => d.country))
-      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
-      .padding(0.1);
+  yScaleDeaths = d3
+    .scaleBand()
+    .domain(deathRank.map((d) => d.country))
+    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+    .padding(0.1);
 
-    yScaleDeaths = d3
-      .scaleBand()
-      .domain(deathRank.map((d) => d.country))
-      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
-      .padding(0.1);
+  yScaleDamages = d3
+    .scaleBand()
+    .domain(damageRank.map((d) => d.country))
+    .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
+    .padding(0.1);
 
-    yScaleDamages = d3
-      .scaleBand()
-      .domain(damageRank.map((d) => d.country))
-      .range([0, dimensions.height - dimensions.margin.top - dimensions.margin.bottom])
-      .padding(0.1);
+  const disasterWrap = document.getElementById('disasters');
+  const deathsWrap = document.getElementById('deaths');
+  const damagesWrap = document.getElementById('damages');
 
-    const disasterWrap = document.getElementById('disasters');
-    const deathsWrap = document.getElementById('deaths');
-    const damagesWrap = document.getElementById('damages');
+  disasterWrap.removeChild(document.querySelector('#disasters>g'))
+  deathsWrap.removeChild(document.querySelector('#deaths>g'))
+  damagesWrap.removeChild(document.querySelector('#damages>g'))
 
-    disasterWrap.removeChild(document.querySelector('#disasters>g'))
-    deathsWrap.removeChild(document.querySelector('#deaths>g'))
-    damagesWrap.removeChild(document.querySelector('#damages>g'))
+  createBarChart('disasters', disasterRank, charts, yScaleDisasters,isAlphabetical);
+  createBarChart('deaths', deathRank, charts, yScaleDeaths,isAlphabetical);
+  createBarChart('damages', damageRank, charts, yScaleDamages,isAlphabetical);
 
-    createBarChart('disasters', disasterRank, charts, yScaleDisasters,isAlphabetical);
-    createBarChart('deaths', deathRank, charts, yScaleDeaths,isAlphabetical);
-    createBarChart('damages', damageRank, charts, yScaleDamages,isAlphabetical);
+  window.resetCharts = function() {
+  clearCharts(); // Clear existing charts
+  // Recreate the charts with the initial data
+  createBarChart("disasters", topCountriesDisasters, charts, "Number of Disasters", false);
+  createBarChart("deaths", filteredCountriesDataDeaths, charts, "Number of Deaths", false);
+  createBarChart("damages", filteredCountriesDataDamages, charts, "Financial Damages($)", false);
+  }
 
-    window.resetCharts = function() {
-    clearCharts(); // Clear existing charts
-    // Recreate the charts with the initial data
-    createBarChart("disasters", topCountriesDisasters, charts, "Number of Disasters", false);
-    createBarChart("deaths", filteredCountriesDataDeaths, charts, "Number of Deaths", false);
-    createBarChart("damages", filteredCountriesDataDamages, charts, "Financial Damages($)", false);
-    }
-
-    // createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
-  };
+  // createBarChart('disasters', topCountriesDisasters, charts, yScaleDisasters);
+};
 
 });

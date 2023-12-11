@@ -23,10 +23,14 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         };
     });
 
-    
-
     // Define a color scale for different disaster types
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // Remove data points with Total_Affected as 0
+        data = data.filter(function (d) {
+            return d.Total_Affected !== 0;
+        });
+    
 
     // Create an SVG element to contain the scatter plot
     var svg = d3.select("#scatterplot")
@@ -104,46 +108,6 @@ d3.csv("1970-2021_DISASTERS_UPDATED_COUNTRIES.csv").then(function(dataset) {
         .attr("x", 0 - dimensions.height / 2)
         .style("text-anchor", "middle")
         .text("Population Affected");
-
-// // Add a color legend
-// var legend = svg.append("g")
-//     .attr("class", "legend")
-//     .attr("transform", "translate(" + (dimensions.width - dimensions.margin.right + 10) + "," + dimensions.margin.top + ")");
-
-//     var legendRectSize = 18;
-//     var legendSpacing = 4;
-
-//     var legendItems = legend.selectAll(".legend-item")
-//         .data(colorScale.domain())
-//         .enter()
-//         .append("g")
-//         .attr("class", "legend-item")
-//         .attr("transform", function(d, i) {
-//             var height = legendRectSize + legendSpacing;
-//             var offset = height * colorScale.domain().length / 2;
-//             var horz = 0; // Adjusted to prevent overlapping with the scatter plot
-//             var vert = i * height - offset;
-//             return "translate(" + horz + "," + vert + ")";
-//         })
-//         .on("click", function (selectedType) {
-//             // Toggle visibility of dots based on the selected disaster type
-//             dots.attr("display", function(d) {
-//                 return (d.Disaster_Type === selectedType) ? null : "none";
-//             });
-//             console.log(selectedType)
-//             console.log(selectedType)
-//         });
-
-//     legendItems.append("rect")
-//         .attr("width", legendRectSize)
-//         .attr("height", legendRectSize)
-//         .style("fill", colorScale);
-
-//     legendItems.append("text")
-//         .attr("x", legendRectSize + legendSpacing)
-//         .attr("y", legendRectSize - legendSpacing)
-//         .style("font-size", "10px")
-//         .text(function(d) { return d; });
     
     var resetButton = d3.select("body")
         .append("button")
